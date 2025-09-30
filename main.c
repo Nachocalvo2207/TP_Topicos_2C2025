@@ -14,6 +14,11 @@ int main(int argc, char* argv[])
         exit(1);
     }
 
+    dibujarTablero(&juego);
+
+    int secuencia[MAX_SEQ];
+    int longitud = 1;
+
     ///Permite que se genere la imagen inicial
     while(true)
     {
