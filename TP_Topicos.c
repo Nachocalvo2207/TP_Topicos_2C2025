@@ -72,3 +72,12 @@ void dibujarTablero(tJuego *juego){
 
     SDL_RenderPresent(juego->renderizar);
 }
+
+int detectarBotonClick(int x, int y){
+    bool top = (y < PIXELES_VERTICALES/2);
+    bool left = (x < PIXELES_HORIZONTALES/2);
+    if(top && left) return VERDE;
+    if(top && !left) return ROJO;
+    if(!top && left) return AMARILLO;
+    return AZUL;
+}
