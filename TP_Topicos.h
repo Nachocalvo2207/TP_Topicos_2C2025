@@ -5,6 +5,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
+#include <time.h>
 
 ///PIXELES (Esta asi en el TP)
 #define TITULO "SIMON_DICE"
@@ -26,8 +27,14 @@ typedef struct{
 #define AZUL 1
 #define AMARILLO 2
 #define VERDE 3
+#define MAX_SEQ 100
 
 ///Funciones
 bool sdl_Iniciar(tJuego *juego);
 void limpieza_juego(tJuego *juego, int Estatus_Salida);
+
+// Funciones del Simon
+void dibujarTablero(tJuego *juego);
+void iluminarBoton(tJuego *juego, int color);
+int detectarBotonClick(int x, int y);
 #endif // TP_TOPICOS_H_INCLUDED
