@@ -1,6 +1,6 @@
 #include "TP_Topicos.h"
 
-// --- NUEVA FUNCIÓN ---
+// --- NUEVA FUNCIÃ“N ---
 bool sdl_Iniciar(tJuego *juego)
 {
     if(SDL_Init(SDL_INIT_EVERYTHING))
@@ -43,4 +43,32 @@ void limpieza_juego(tJuego *juego, int Estatus_Salida)
     SDL_Quit();
     exit(Estatus_Salida);
 
+}
+
+// ----- SIMON -----
+
+void dibujarTablero(tJuego *juego){
+    SDL_Rect r;
+
+    // VERDE arriba izq
+    r.x = 0; r.y = 0; r.w = PIXELES_HORIZONTALES/2; r.h = PIXELES_VERTICALES/2;
+    SDL_SetRenderDrawColor(juego->renderizar, 0,200,0,255);
+    SDL_RenderFillRect(juego->renderizar,&r);
+
+    // ROJO arriba der
+    r.x = PIXELES_HORIZONTALES/2; r.y = 0;
+    SDL_SetRenderDrawColor(juego->renderizar, 200,0,0,255);
+    SDL_RenderFillRect(juego->renderizar,&r);
+
+    // AMARILLO abajo izq
+    r.x = 0; r.y = PIXELES_VERTICALES/2;
+    SDL_SetRenderDrawColor(juego->renderizar, 200,200,0,255);
+    SDL_RenderFillRect(juego->renderizar,&r);
+
+    // AZUL abajo der
+    r.x = PIXELES_HORIZONTALES/2; r.y = PIXELES_VERTICALES/2;
+    SDL_SetRenderDrawColor(juego->renderizar, 0,0,200,255);
+    SDL_RenderFillRect(juego->renderizar,&r);
+
+    SDL_RenderPresent(juego->renderizar);
 }
