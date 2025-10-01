@@ -5,8 +5,8 @@ El juego muestra una secuencia de colores que el jugador debe repetir haciendo c
 Con cada nivel, la secuencia aumenta su longitud y dificultad.
 
 ## Estructura del Proyecto
-.
-├── main.c # Punto de entrada del juego
-├── TP_Topicos.h # Header con definiciones, macros y prototipos
-├── TP_Topicos.c # Lógica del tablero, SDL y funciones del juego
-└── README.md # Este archivo
+
+- main.c # Punto de entrada del juego
+- TP_Topicos.h # Header con definiciones, macros y prototipos
+- TP_Topicos.c # Lógica del tablero, SDL y funciones del juego
+
