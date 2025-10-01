@@ -1,15 +1,13 @@
 #include "TP_Topicos.h"
 
-int secuencia[MAX_SEQ];
-int nivelActual = 0;
-
 // --- NUEVA FUNCIÓN ---
 bool sdl_Iniciar(tJuego *juego)
 {
-    if(SDL_Init(SDL_INIT_EVERYTHING))
+    if(SDL_Init(SDL_INIT_VIDEO) != 0){
+        printf(stderr, "ERROR INICIALIZANDO SDL: %s\n", SDL_GetError());
         return false;
     
-
+    }
     ///CREA LA VENTANA QUE DA LA IMAGEN
     juego->ventana = SDL_CreateWindow
                         (
@@ -23,7 +21,7 @@ bool sdl_Iniciar(tJuego *juego)
 
     if(!juego->ventana)
     {
-        fprintf(stderr,"ERROR CREANDO VENTANA: %s \n",SDL_GetError());
+        printf(stderr,"ERROR CREANDO VENTANA: %s \n",SDL_GetError());
         return false;
     }
 
@@ -32,7 +30,7 @@ bool sdl_Iniciar(tJuego *juego)
 
     if(!juego->renderizar)
     {
-        fprintf(stderr,"ERROR CREANDO RENDERIZADO: %s \n",SDL_GetError());
+        printf(stderr,"ERROR CREANDO RENDERIZADO: %s \n",SDL_GetError());
         return false;
     }
 
@@ -85,8 +83,8 @@ int detectarBotonClick(int x, int y){
     return AZUL;
 }
 
-void generarSecuencia() {
-    for(int i = 0; i < MAX_SEQ; i++) {
+void generarSecuencia(int secuencia[], int longitud) {
+    for(int i = 0; i < longitud; i++) {
         secuencia[i] = rand() % 4; // VERDE=0, ROJO=1, AMARILLO=2, AZUL=3
     }
 }
