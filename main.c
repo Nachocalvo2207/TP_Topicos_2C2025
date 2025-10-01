@@ -6,31 +6,34 @@ int main(int argc, char* argv[])
 
     tJuego juego;
 
-    if(sdl_Iniciar(&juego))
+    if(!sdl_Iniciar(&juego))
     {
-        limpieza_juego(&juego,ERROR_SALIDA);
-        printf("Todo mal!\n");
+        printf("Error al iniciar\n");
 
-        exit(1);
+        return ERROR_SALIDA;
     }
 
+    srand(time(NULL));
     dibujarTablero(&juego);
 
     int secuencia[MAX_SEQ];
     int longitud = 1;
     bool jugando = true;
-
-    // Genera primera secuencia
-    secuencia[0] = rand()%4;
+    
+    generarSecuencia(secuencia, MAX_SEQ); // rellena la secuencia global
 
     ///Permite que se genere la imagen inicial
-    while(true)
+    while(jugando)
     {
     SDL_Event event;
     ///Agarro todos los eventos que pasen en el loop
     while(SDL_PollEvent(&event))
     {
         switch(event.type){
+            case SDL_MOUSEBUTTONDOWN:
+                int x = event.button.x, y = event.button.y;
+                int elegido = detectarBotonClick(x,y);
+                break;
             case SDL_QUIT:
                 limpieza_juego(&juego,OK_SALIDA);
                 break;
@@ -50,7 +53,7 @@ int main(int argc, char* argv[])
     }
     SDL_RenderClear(juego.renderizar);
     SDL_RenderPresent(juego.renderizar);
-    SDL_Delay(16); ///5 segs
+    SDL_Delay(16); ///16 segs
     }
 
     limpieza_juego(&juego,OK_SALIDA);
