@@ -8,7 +8,7 @@
 #include <time.h>
 
 ///PIXELES (Esta asi en el TP)
-#define TITULO "SIMON_DICE"
+#define TITULO "SIMON"
 #define PIXELES_HORIZONTALES 1366
 #define PIXELES_VERTICALES 768
 
@@ -23,22 +23,25 @@ typedef struct{
 #define ERROR_SALIDA 1
 
 ///Botones
-#define ROJO 0
-#define AZUL 1
+#define ROJO 1
+#define AZUL 3
 #define AMARILLO 2
-#define VERDE 3
+#define VERDE 0
 #define MAX_SEQ 100
 
-///Secuencia de Simon
-extern int secuencia[MAX_SEQ];
-extern int nivelActual;
+//Struct para SDL
+typedef struct {
+    SDL_Window* ventana;
+    SDL_Renderer* renderizar;
+} tJuego;
 
-///Funciones
+///Prototipos
 bool sdl_Iniciar(tJuego *juego);
 void limpieza_juego(tJuego *juego, int Estatus_Salida);
 
 ///Funciones del Simon
 void dibujarTablero(tJuego *juego);
-void iluminarBoton(tJuego *juego, int color);
+void iluminarColor(tJuego *juego, int color);
 int detectarBotonClick(int x, int y);
+void generarSecuencia(int secuencia[], int longitud);
 #endif // TP_TOPICOS_H_INCLUDED
