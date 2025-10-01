@@ -1,5 +1,8 @@
 #include "TP_Topicos.h"
 
+int secuencia[MAX_SEQ];
+int nivelActual = 0;
+
 // --- NUEVA FUNCIÓN ---
 bool sdl_Iniciar(tJuego *juego)
 {
@@ -80,4 +83,11 @@ int detectarBotonClick(int x, int y){
     if(top && !left) return ROJO;
     if(!top && left) return AMARILLO;
     return AZUL;
+}
+
+void generarSecuencia() {
+    srand(time(NULL));
+    for(int i = 0; i < MAX_SEQ; i++) {
+        secuencia[i] = rand() % 4; // 0=ROJO,1=AZUL,2=AMARILLO,3=VERDE
+    }
 }
