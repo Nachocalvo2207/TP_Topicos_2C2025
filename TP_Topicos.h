@@ -29,11 +29,15 @@ typedef struct{
 #define VERDE 3
 #define MAX_SEQ 100
 
+///Secuencia de Simon
+extern int secuencia[MAX_SEQ];
+extern int nivelActual;
+
 ///Funciones
 bool sdl_Iniciar(tJuego *juego);
 void limpieza_juego(tJuego *juego, int Estatus_Salida);
 
-// Funciones del Simon
+///Funciones del Simon
 void dibujarTablero(tJuego *juego);
 void iluminarBoton(tJuego *juego, int color);
 int detectarBotonClick(int x, int y);
