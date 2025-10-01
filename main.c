@@ -18,6 +18,10 @@ int main(int argc, char* argv[])
 
     int secuencia[MAX_SEQ];
     int longitud = 1;
+    bool jugando = true;
+
+    // Genera primera secuencia
+    secuencia[0] = rand()%4;
 
     ///Permite que se genere la imagen inicial
     while(true)
