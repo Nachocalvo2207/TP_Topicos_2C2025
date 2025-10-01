@@ -7,8 +7,8 @@ int nivelActual = 0;
 bool sdl_Iniciar(tJuego *juego)
 {
     if(SDL_Init(SDL_INIT_EVERYTHING))
-        return true;
-    ;
+        return false;
+    
 
     ///CREA LA VENTANA QUE DA LA IMAGEN
     juego->ventana = SDL_CreateWindow
@@ -24,7 +24,7 @@ bool sdl_Iniciar(tJuego *juego)
     if(!juego->ventana)
     {
         fprintf(stderr,"ERROR CREANDO VENTANA: %s \n",SDL_GetError());
-        return true;
+        return false;
     }
 
     ///
@@ -33,10 +33,10 @@ bool sdl_Iniciar(tJuego *juego)
     if(!juego->renderizar)
     {
         fprintf(stderr,"ERROR CREANDO RENDERIZADO: %s \n",SDL_GetError());
-        return true;
+        return false;
     }
 
-    return false; ///FALSE ES NUESTRO CASO DE EXITO EN ESTE CASO
+    return true; /// CASO DE EXITO
 }
 
 void limpieza_juego(tJuego *juego, int Estatus_Salida)
@@ -86,8 +86,7 @@ int detectarBotonClick(int x, int y){
 }
 
 void generarSecuencia() {
-    srand(time(NULL));
     for(int i = 0; i < MAX_SEQ; i++) {
-        secuencia[i] = rand() % 4; // 0=ROJO,1=AZUL,2=AMARILLO,3=VERDE
+        secuencia[i] = rand() % 4; // VERDE=0, ROJO=1, AMARILLO=2, AZUL=3
     }
 }
