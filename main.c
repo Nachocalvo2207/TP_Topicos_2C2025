@@ -4,56 +4,44 @@ int main(int argc, char* argv[])
 {
     ///SDL_init( SDL_INIT_EVERYTHING );
 
+    ///Genero un numero aleatorio
+    srand(time(NULL));
+
     tJuego juego;
+    reiniciarJuego(&juego);
 
-    if(!sdl_Iniciar(&juego))
+    if(sdl_Iniciar(&juego))
     {
-        printf("Error al iniciar\n");
+        limpieza_juego(&juego,ERROR_SALIDA);
+        printf("Todo mal!\n");
 
-        return ERROR_SALIDA;
+        exit(1);
     }
 
-    srand(time(NULL));
-    dibujarTablero(&juego);
+    if(crearTexto(&juego))
+    {
+        limpieza_juego(&juego,ERROR_SALIDA);
+        printf("No se pudo crear el texto!\n");
+        exit(1);
+    }
 
-    int secuencia[MAX_SEQ];
-    int longitud = 1;
-    bool jugando = true;
-    
-    generarSecuencia(secuencia, MAX_SEQ); // rellena la secuencia global
+    bool corriendo = true;
+    // Genera primera secuencia
+
 
     ///Permite que se genere la imagen inicial
-    while(jugando)
+    while(corriendo)
     {
-    SDL_Event event;
-    ///Agarro todos los eventos que pasen en el loop
-    while(SDL_PollEvent(&event))
-    {
-        switch(event.type){
-            case SDL_MOUSEBUTTONDOWN:
-                int x = event.button.x, y = event.button.y;
-                int elegido = detectarBotonClick(x,y);
-                break;
-            case SDL_QUIT:
-                limpieza_juego(&juego,OK_SALIDA);
-                break;
-            ///PARA SALIR APRETANDO ESC
-            case SDL_KEYDOWN:
-                switch(event.key.keysym.scancode)
-                {
-                case SDL_SCANCODE_ESCAPE:
-                    limpieza_juego(&juego,OK_SALIDA);
-                default:
-                    break;
-                }
 
-            default:
-                break;
-        }
-    }
-    SDL_RenderClear(juego.renderizar);
-    SDL_RenderPresent(juego.renderizar);
-    SDL_Delay(16); ///16 segs
+        manejarEventos(&juego, &corriendo);
+
+        ///Logica del juego
+        actualizarJuego(&juego);
+
+        ///Imagen pantalla
+        dibujar_juego(&juego);
+
+        SDL_Delay(16); ///5 segs
     }
 
     limpieza_juego(&juego,OK_SALIDA);

@@ -16,15 +16,18 @@
 					<Add directory="lib/SDL2-2.32.8/x86_64-w64-mingw32/include" />
 					<Add directory="lib/SDL2-2.32.8/x86_64-w64-mingw32/include/SDL2" />
 					<Add directory="lib/SDL2_mixer-2.8.1/x86_64-w64-mingw32/include" />
+					<Add directory="lib/SDL2_ttf-2.24.0/x86_64-w64-mingw32/include" />
 				</Compiler>
 				<Linker>
 					<Add option="-lmingw32" />
 					<Add option="-lSDL2main" />
 					<Add option="-lSDL2" />
 					<Add option="-lSDL2_mixer" />
+					<Add option="-lSDL2_ttf" />
 					<Add library="SDL2" />
 					<Add directory="lib/SDL2-2.32.8/x86_64-w64-mingw32/lib" />
 					<Add directory="lib/SDL2_mixer-2.8.1/x86_64-w64-mingw32/lib" />
+					<Add directory="lib/SDL2_ttf-2.24.0/x86_64-w64-mingw32/lib" />
 				</Linker>
 			</Target>
 			<Target title="Release">
