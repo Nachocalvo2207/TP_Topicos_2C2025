@@ -2,10 +2,12 @@
 #define TP_TOPICOS_H_INCLUDED
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_ttf.h>
+#include <SDL2/SDL_mixer.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
 #include <time.h>
+#include <string.h>
 
 ///PIXELES (Esta asi en el TP)
 #define TITULO "SIMON_DICE"
@@ -27,13 +29,24 @@
 #define AMARILLO 2
 #define AZUL 3
 
-
 ///ESTADOS
 #define INICIO 0
 #define SECUENCIA 1
 #define JUGANDO 2
 #define FINALIZADO 3
+#define MENU_CONFIG 4
+#define PIDIENDO_NOMBRE 5
 
+///MODOS
+#define MODO_SCHONBERG 0
+#define MODO_MOZART 1
+
+typedef struct {
+    int num_botones;           // 3..8
+    int duracion_inicial_ms;   // MIN 2000 SEGUN TP
+    int modo;                  // MODO_SCHONBERG / MODO_MOZART
+    char ruta_melodia[256];    // RUTA DEL ARCHIVO PARA MODO Mozart
+} tConfig;
 
 ///Estructuras
 typedef struct
@@ -52,8 +65,12 @@ typedef struct
     Uint32 tiempo_ultimo_cambio;
     int paso_secuencia;
     int estado_juego; ///Para chequear si se encuentra jugando
+    tConfig config;
+    char nombre_jugador[64];
+    int partidas_jugadas;
+    int partidas_ganadas;
+    int partidas_perdidas;
 } tJuego;
-
 
 ///Funciones
 bool sdl_Iniciar(tJuego *juego);
@@ -70,4 +87,10 @@ void manejarEventos(tJuego *juego,bool *corriendo);
 //void iluminarBoton(tJuego *juego, int color);
 int detectarBotonClick(int x, int y);
 void agregar_nuevo_color_secuencia(tJuego *juego);
+void mostrarPantallaPresentacion(tJuego *juego);
+void mostrarMenuConfiguracion(tJuego *juego);
+void pedirNombreJugador(tJuego *juego, bool *corriendo);
+int cargarMelodiaDesdeArchivo(const char *ruta, tJuego *juego);
+int calcularDuracionPorNota(int duracion_inicial_ms, int cantidad_notas);
 #endif // TP_TOPICOS_H_INCLUDED
+
