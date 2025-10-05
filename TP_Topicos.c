@@ -67,7 +67,7 @@ bool crearTexto(tJuego *juego)
         return true;
     }
 
-    SDL_Surface *superficie = TTF_RenderText_Blended(juego->texto_fuente,"VA QUERIENDO",juego->texto_color);
+    SDL_Surface *superficie = TTF_RenderText_Blended(juego->texto_fuente,"SIMON",juego->texto_color);
 
     if(!superficie)
     {
