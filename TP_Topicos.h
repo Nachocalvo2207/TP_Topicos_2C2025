@@ -8,6 +8,7 @@
 #include <stdbool.h>
 #include <time.h>
 #include <string.h>
+#include <math.h>
 
 ///PIXELES (Esta asi en el TP)
 #define TITULO "SIMON_DICE"
