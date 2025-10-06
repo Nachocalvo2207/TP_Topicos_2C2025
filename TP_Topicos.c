@@ -38,6 +38,8 @@ bool sdl_Iniciar(tJuego *juego)
         return true;
     }
 
+
+
     return false; ///FALSE ES NUESTRO CASO DE EXITO EN ESTE CASO
 }
 
@@ -51,6 +53,7 @@ void reiniciarJuego(tJuego *juego)
     juego->color_iluminado = SIN_COLOR; // -1 = Ningún color iluminado
     juego->tiempo_ultimo_cambio = 0;
 }
+
 
 bool crearTexto(tJuego *juego)
 {
@@ -75,6 +78,7 @@ bool crearTexto(tJuego *juego)
         fprintf(stderr,"ERROR CREANDO SUPERFICIE: %s\n",SDL_GetError());
     }
 
+
     juego->texto_rect.w = superficie->w; ///Ancho texto
     juego->texto_rect.h = superficie->h; ///Altura texto
     juego->texto_rect.x = (PIXELES_HORIZONTALES - juego->texto_rect.w) / 2;
@@ -88,6 +92,7 @@ bool crearTexto(tJuego *juego)
         fprintf(stderr,"ERROR CREANDO LA TEXTURA: %s\n",SDL_GetError());
         return true;
     }
+
 
     return false;
 }
@@ -192,62 +197,69 @@ void manejarEventos(tJuego *juego, bool *corriendo)
 ///Divido el tablero en 4 partes iguales de distintos colores
 void dibujarTablero(tJuego *juego)
 {
-    SDL_Rect r;
-    r.w = PIXELES_HORIZONTALES / 2;
-    r.h = PIXELES_VERTICALES / 2;
+     SDL_SetRenderDrawColor(juego->renderizar, 0, 0, 0, 255);
+    SDL_RenderClear(juego->renderizar);
 
-    ///VERDE (arriba izq) ---
-    r.x = 0;
-    r.y = 0;
-    if (juego->color_iluminado == VERDE)
-    {
-        SDL_SetRenderDrawColor(juego->renderizar, 0, 255, 0, 255); // Color brillante
-    }
-    else
-    {
-        SDL_SetRenderDrawColor(juego->renderizar, 0, 180, 0, 255); // Color normal
-    }
-    SDL_RenderFillRect(juego->renderizar, &r);
+    int cx = PIXELES_HORIZONTALES / 2;
+    int cy = PIXELES_VERTICALES / 2;
+    int radioExterior = (PIXELES_VERTICALES < PIXELES_HORIZONTALES ?
+                         PIXELES_VERTICALES : PIXELES_HORIZONTALES) / 2 - 10;
+    int radioInterior = radioExterior / 2; // agujero central
 
-    ///ROJO (arriba der)
-    r.x = PIXELES_HORIZONTALES / 2;
-    r.y = 0;
-    if (juego->color_iluminado == ROJO)
-    {
-        SDL_SetRenderDrawColor(juego->renderizar, 255, 0, 0, 255); // Brillante
-    }
-    else
-    {
-        SDL_SetRenderDrawColor(juego->renderizar, 150, 0, 0, 255); // Normal
-    }
-    SDL_RenderFillRect(juego->renderizar, &r);
+    int r,g,b;
 
-    ///DIBUJA AMARILLO (abajo izq)
-    r.x = 0;
-    r.y = PIXELES_VERTICALES / 2;
-    if (juego->color_iluminado == AMARILLO)
+    // recorremos solo la zona que ocupa el círculo
+    for(int y = cy - radioExterior; y <= cy + radioExterior; y++)
     {
-        SDL_SetRenderDrawColor(juego->renderizar, 255, 255, 0, 255); // Brillante
-    }
-    else
-    {
-        SDL_SetRenderDrawColor(juego->renderizar, 180, 180, 0, 255); // Normal
-    }
-    SDL_RenderFillRect(juego->renderizar, &r);
+        for(int x = cx - radioExterior; x <= cx + radioExterior; x++)
+        {
+            int dx = x - cx;
+            int dy = y - cy;
+            int dist2 = dx*dx + dy*dy;
 
-    ///DIBUJA AZUL (abajo der)
-    r.x = PIXELES_HORIZONTALES / 2;
-    r.y = PIXELES_VERTICALES / 2;
-    if (juego->color_iluminado == AZUL)
-    {
-        SDL_SetRenderDrawColor(juego->renderizar, 50, 50, 255, 255); // Brillante
+            // fuera del círculo de juego → saltar
+            if(dist2 > radioExterior*radioExterior) continue;
+            // dentro del agujero central → pintamos negro
+            if(dist2 < radioInterior*radioInterior) {
+                SDL_SetRenderDrawColor(juego->renderizar, 0,0,0,255);
+                SDL_RenderDrawPoint(juego->renderizar, x, y);
+                continue;
+            }
+
+            // calculamos ángulo
+            double ang = atan2((double)dy, (double)dx); // [-π, π]
+            if(ang < 0) ang += 2*M_PI; // a [0, 2π)
+
+            // Determinar color del sector
+            // Brillo base
+            int brilloOscuro = 150;
+            int brilloBrillante = 255;
+
+            if(ang >= 0 && ang < M_PI/2) {       // 0 a 90° → abajo derecha → Azul
+                if(juego->color_iluminado == AZUL) { r=0; g=0; b=brilloBrillante; }
+                else                                { r=0; g=0; b=brilloOscuro; }
+            }
+            else if(ang >= M_PI/2 && ang < M_PI) { // 90 a 180° → abajo izquierda → Amarillo
+                if(juego->color_iluminado == AMARILLO) { r=brilloBrillante; g=brilloBrillante; b=0; }
+                else                                    { r=brilloOscuro; g=brilloOscuro; b=0; }
+            }
+            else if(ang >= M_PI && ang < 3*M_PI/2) { // 180 a 270° → arriba izquierda → Verde
+                if(juego->color_iluminado == VERDE) { r=0; g=brilloBrillante; b=0; }
+                else                                 { r=0; g=brilloOscuro; b=0; }
+            }
+            else {                                  // 270 a 360° → arriba derecha → Rojo
+                if(juego->color_iluminado == ROJO) { r=brilloBrillante; g=0; b=0; }
+                else                                { r=brilloOscuro; g=0; b=0; }
+            }
+
+            SDL_SetRenderDrawColor(juego->renderizar, r, g, b, 255);
+            SDL_RenderDrawPoint(juego->renderizar, x, y);
+        }
     }
-    else
-    {
-        SDL_SetRenderDrawColor(juego->renderizar, 0, 0, 150, 255); // Normal
-    }
-    SDL_RenderFillRect(juego->renderizar, &r);
+
+    SDL_RenderPresent(juego->renderizar);
 }
+
 
 void dibujar_juego(tJuego *juego)
 {
@@ -261,15 +273,32 @@ void dibujar_juego(tJuego *juego)
     SDL_RenderPresent(juego->renderizar);
 }
 
+
 int detectarBotonClick(int x, int y)
 {
-    bool top = (y < PIXELES_VERTICALES/2);
-    bool left = (x < PIXELES_HORIZONTALES/2);
+    int cx = PIXELES_HORIZONTALES / 2;
+    int cy = PIXELES_VERTICALES / 2;
+    int radioExterior = (PIXELES_VERTICALES < PIXELES_HORIZONTALES ?
+                         PIXELES_VERTICALES : PIXELES_HORIZONTALES) / 2 - 10;
+    int radioInterior = radioExterior / 2;
+
+    int dx = x - cx;
+    int dy = y - cy;
+    double dist = sqrt(dx*dx + dy*dy);
+
+    if(dist < radioInterior || dist > radioExterior)
+        return SIN_COLOR;  // clic fuera de la zona de colores
+
+    // determinar sector usando los ejes
+    bool top = (y < cy);
+    bool left = (x < cx);
+
     if(top && left) return VERDE;
     if(top && !left) return ROJO;
     if(!top && left) return AMARILLO;
     return AZUL;
 }
+
 
 void agregar_nuevo_color_secuencia(tJuego *juego)
 {
@@ -280,6 +309,9 @@ void agregar_nuevo_color_secuencia(tJuego *juego)
         juego->secuencia[indice] = rand() % 4;
     }
 }
+
+
+
 
 /// REALIZO LA SECUENCIA DE COLORES
 void actualizarJuego(tJuego *juego)
@@ -322,6 +354,7 @@ void actualizarJuego(tJuego *juego)
         }
     }
 }
+
 
 void limpieza_juego(tJuego *juego, int Estatus_Salida)
 {
