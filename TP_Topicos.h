@@ -30,6 +30,7 @@
 #define AMARILLO 2
 #define AZUL 3
 
+
 ///ESTADOS
 #define INICIO 0
 #define SECUENCIA 1
@@ -83,7 +84,7 @@ void actualizarJuego(tJuego *juego);
 void reiniciarJuego(tJuego *juego);
 void dibujarTablero(tJuego *juego);
 void dibujar_juego(tJuego *juego);
-
+void mostrarEstadisticas(tJuego *juego);
 void manejarEventos(tJuego *juego,bool *corriendo);
 //void iluminarBoton(tJuego *juego, int color);
 int detectarBotonClick(int x, int y);
@@ -94,4 +95,3 @@ void pedirNombreJugador(tJuego *juego, bool *corriendo);
 int cargarMelodiaDesdeArchivo(const char *ruta, tJuego *juego);
 int calcularDuracionPorNota(int duracion_inicial_ms, int cantidad_notas);
 #endif // TP_TOPICOS_H_INCLUDED
-
