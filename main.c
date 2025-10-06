@@ -45,36 +45,37 @@ int main(int argc, char* argv[])
     while(corriendo)
     {
 
-        manejarEventos(&juego, &corriendo);
-
-        if(juego.estado_juego == INICIO)
-        {
-            mostrarPantallaPresentacion(&juego);
-            SDL_Delay(16);
-            continue;
-        }
-
-        // Si pedimos nombre
-        if(juego.estado_juego == PIDIENDO_NOMBRE)
+         // Si pedimos nombre
+         if(juego.estado_juego == PIDIENDO_NOMBRE)
         {
             pedirNombreJugador(&juego, &corriendo);
             SDL_Delay(16);
             continue;
         }
 
-        ///Logica del juego
-        actualizarJuego(&juego);
+        manejarEventos(&juego, &corriendo);
 
-        ///Imagen pantalla
-        dibujar_juego(&juego);
+        if(juego.estado_juego == INICIO)
+        {
+            mostrarPantallaPresentacion(&juego);
+        }
+        else if (juego.estado_juego == SECUENCIA || juego.estado_juego == JUGANDO)
+        {
+            actualizarJuego(&juego);
+            dibujar_juego(&juego);
+        }
+        else if (juego.estado_juego == FINALIZADO)
+        {
+            mostrarEstadisticas(&juego);
+        }
 
-        SDL_Delay(16); ///5 segs
+        SDL_Delay(16);
     }
 
     limpieza_juego(&juego,OK_SALIDA);
     printf("Todo correcto!\n");
-    getchar();
+    //getchar();
     return 0;
-    
+
 }
 
