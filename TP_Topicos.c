@@ -1,4 +1,4 @@
-#include "TP_Topicos.h"
+    #include "TP_Topicos.h"
 
 bool sdl_Iniciar(tJuego *juego)
 {
@@ -134,12 +134,18 @@ void manejarEventos(tJuego *juego, bool *corriendo)
 
             case SDL_SCANCODE_SPACE:
                 /// Si arrancamos o perdimos
-                if (juego->estado_juego == INICIO || juego->estado_juego == FINALIZADO)
+                if (juego->estado_juego == INICIO)
+                {
+                   juego->estado_juego = PIDIENDO_NOMBRE;
+                   SDL_StartTextInput();
+                   printf("Juego iniciado. Nivel 1. Secuencia: %s\n", traducirColor(juego->secuencia[0]));
+                }
+
+                    else if(juego->estado_juego == FINALIZADO)
                 {
                     reiniciarJuego(juego);
                     agregar_nuevo_color_secuencia(juego); ///Genero el primer color
                     juego->estado_juego = SECUENCIA;      /// Modifico el estado del juego
-                    printf("Juego iniciado. Nivel 1. Secuencia: %s\n", traducirColor(juego->secuencia[0]));
                 }
                 break;
             default:
@@ -182,6 +188,8 @@ void manejarEventos(tJuego *juego, bool *corriendo)
                 else
                 {
                     juego->estado_juego = FINALIZADO;
+                    juego->partidas_jugadas++;
+                    juego->partidas_perdidas++;
                 }
             }
             break;
@@ -309,8 +317,6 @@ void agregar_nuevo_color_secuencia(tJuego *juego)
         juego->secuencia[indice] = rand() % 4;
     }
 }
-
-
 
 
 /// REALIZO LA SECUENCIA DE COLORES
@@ -472,58 +478,141 @@ void mostrarMenuConfiguracion(tJuego *juego)
 }
 
 // --- Pedir nombre del jugador (interacción simple por teclado)
-    void pedirNombreJugador(tJuego *juego, bool *corriendo)
-    {
-    // Dibujar prompt
+void pedirNombreJugador(tJuego *juego, bool *corriendo)
+{
     SDL_RenderClear(juego->renderizar);
+
+    // Mostrar prompt
     char prompt[128];
-    snprintf(prompt, sizeof(prompt), "Ingrese nombre del jugador (ENTER para aceptar): %s", juego->nombre_jugador);
+    snprintf(prompt, sizeof(prompt), "Ingrese su nombre (ENTER para aceptar): %s", juego->nombre_jugador);
+
     SDL_Surface *s = TTF_RenderText_Blended(juego->texto_fuente, prompt, juego->texto_color);
     SDL_Texture *t = SDL_CreateTextureFromSurface(juego->renderizar, s);
-    SDL_Rect r = {20, PIXELES_VERTICALES/2 - s->h/2, s->w, s->h};
+    SDL_Rect r = {40, PIXELES_VERTICALES/2 - s->h/2, s->w, s->h};
     SDL_RenderCopy(juego->renderizar, t, NULL, &r);
     SDL_FreeSurface(s);
     SDL_DestroyTexture(t);
+
     SDL_RenderPresent(juego->renderizar);
 
-    // Recibir eventos de teclado (sin bloquear)
+    // Procesar eventos
     SDL_Event event;
     while(SDL_PollEvent(&event))
     {
-        if(event.type == SDL_QUIT) { *corriendo = false; return; }
-        if(event.type == SDL_KEYDOWN)
+        if(event.type == SDL_QUIT)
         {
-            if(event.key.keysym.scancode == SDL_SCANCODE_ESCAPE) { *corriendo = false; return; }
-            if(event.key.keysym.scancode == SDL_SCANCODE_RETURN)
-            {
-                // si vacío, poner "Anon"
-                if(strlen(juego->nombre_jugador) == 0) strcpy(juego->nombre_jugador, "Anon");
-                // volver a estado inicio para luego iniciar juego con SPACE
-                juego->estado_juego = INICIO;
+            *corriendo = false; return;
+        }
+
+        if (event.type == SDL_TEXTINPUT)
+        {
+            if (strlen(juego->nombre_jugador) + strlen(event.text.text) < sizeof(juego->nombre_jugador) - 1)
+                strcat(juego->nombre_jugador, event.text.text);
+        }
+
+        else if(event.type == SDL_KEYDOWN)
+        {
+            SDL_Keycode key = event.key.keysym.sym;
+
+            if(key == SDLK_ESCAPE) {
+                *corriendo = false;
+                SDL_StopTextInput();
                 return;
             }
-            // backspace
-            if(event.key.keysym.scancode == SDL_SCANCODE_BACKSPACE)
-            {
-                size_t L = strlen(juego->nombre_jugador);
-                if(L) juego->nombre_jugador[L-1] = '\0';
+            else if(key == SDLK_RETURN) {
+                if(strlen(juego->nombre_jugador) == 0)
+                    strcpy(juego->nombre_jugador, "Anon");
+                // cuando confirma, arrancamos el juego
+                reiniciarJuego(juego);
+                agregar_nuevo_color_secuencia(juego);
+                juego->estado_juego = SECUENCIA;
+                SDL_StopTextInput();
+                return;
             }
-            else {
-                // capturamos letras
-                SDL_Keycode key = event.key.keysym.sym;
-                if((key >= 'a' && key <= 'z') || (key >= 'A' && key <= 'Z') || (key == ' '))
-                {
-                    size_t L = strlen(juego->nombre_jugador);
-                    if(L + 1 < sizeof(juego->nombre_jugador)) {
-                        juego->nombre_jugador[L] = (char)key;
-                        juego->nombre_jugador[L+1] = '\0';
-                    }
-                }
+            else if(key == SDLK_BACKSPACE) {
+                size_t L = strlen(juego->nombre_jugador);
+                if(L > 0) juego->nombre_jugador[L-1] = '\0';
+            }
+        }
+        else if(event.type == SDL_TEXTINPUT) {   // <---- captura caracteres
+            if(strlen(juego->nombre_jugador) + strlen(event.text.text) < sizeof(juego->nombre_jugador) - 1) {
+                strcat(juego->nombre_jugador, event.text.text);
             }
         }
     }
 }
 
+
+void mostrarEstadisticas(tJuego *juego)
+{
+    SDL_RenderClear(juego->renderizar);
+
+    SDL_Color blanco = {255,255,255,255};
+
+    char linea[128];
+    SDL_Surface *s;
+    SDL_Texture *t;
+    SDL_Rect r;
+    int y = 100;
+
+    // Título
+    s = TTF_RenderText_Blended(juego->texto_fuente, "ESTADISTICAS DEL JUEGO", blanco);
+    t = SDL_CreateTextureFromSurface(juego->renderizar, s);
+    r = (SDL_Rect){(PIXELES_HORIZONTALES - s->w)/2, y, s->w, s->h};
+    SDL_RenderCopy(juego->renderizar, t, NULL, &r);
+    SDL_FreeSurface(s);
+    SDL_DestroyTexture(t);
+    y += 60;
+
+    // Nombre del jugador
+    snprintf(linea, sizeof(linea), "Jugador: %s", juego->nombre_jugador);
+    s = TTF_RenderText_Blended(juego->texto_fuente, linea, blanco);
+    t = SDL_CreateTextureFromSurface(juego->renderizar, s);
+    r = (SDL_Rect){50, y, s->w, s->h};
+    SDL_RenderCopy(juego->renderizar, t, NULL, &r);
+    SDL_FreeSurface(s);
+    SDL_DestroyTexture(t);
+    y += 40;
+
+    // Partidas jugadas
+    snprintf(linea, sizeof(linea), "Partidas jugadas: %d", juego->partidas_jugadas);
+    s = TTF_RenderText_Blended(juego->texto_fuente, linea, blanco);
+    t = SDL_CreateTextureFromSurface(juego->renderizar, s);
+    r.y = y; r.x = 50; r.w = s->w; r.h = s->h;
+    SDL_RenderCopy(juego->renderizar, t, NULL, &r);
+    SDL_FreeSurface(s);
+    SDL_DestroyTexture(t);
+    y += 40;
+
+    // Ganadas
+    snprintf(linea, sizeof(linea), "Partidas ganadas: %d", juego->partidas_ganadas);
+    s = TTF_RenderText_Blended(juego->texto_fuente, linea, blanco);
+    t = SDL_CreateTextureFromSurface(juego->renderizar, s);
+    r.y = y; r.x = 50; r.w = s->w; r.h = s->h;
+    SDL_RenderCopy(juego->renderizar, t, NULL, &r);
+    SDL_FreeSurface(s);
+    SDL_DestroyTexture(t);
+    y += 40;
+
+    // Perdidas
+    snprintf(linea, sizeof(linea), "Partidas perdidas: %d", juego->partidas_perdidas);
+    s = TTF_RenderText_Blended(juego->texto_fuente, linea, blanco);
+    t = SDL_CreateTextureFromSurface(juego->renderizar, s);
+    r.y = y; r.x = 50; r.w = s->w; r.h = s->h;
+    SDL_RenderCopy(juego->renderizar, t, NULL, &r);
+    SDL_FreeSurface(s);
+    SDL_DestroyTexture(t);
+
+    // Instrucciones
+    s = TTF_RenderText_Blended(juego->texto_fuente, "Presione SPACE para volver a jugar o ESC para salir", blanco);
+    t = SDL_CreateTextureFromSurface(juego->renderizar, s);
+    r.y = PIXELES_VERTICALES - 60; r.x = 20; r.w = s->w; r.h = s->h;
+    SDL_RenderCopy(juego->renderizar, t, NULL, &r);
+    SDL_FreeSurface(s);
+    SDL_DestroyTexture(t);
+
+    SDL_RenderPresent(juego->renderizar);
+}
 // --- Cargar melodía desde archivo (modo Mozart)
 // Formato simple: lista de enteros 0..(num_botones-1) separados por espacios o nuevas lineas.
 // Devuelve cantidad de notas cargadas, o -1 en error
@@ -560,4 +649,3 @@ int calcularDuracionPorNota(int duracion_inicial_ms, int cantidad_notas)
     }
     return (int)(dur + 0.5);
 }
-
