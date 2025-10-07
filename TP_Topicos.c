@@ -1,14 +1,22 @@
-    #include "TP_Topicos.h"
+#include "TP_Topicos.h"
 
 bool sdl_Iniciar(tJuego *juego)
 {
-    if(SDL_Init(SDL_INIT_EVERYTHING))
+    if(SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO))
+    {
+        fprintf(stderr,"Error iniciando SDL: %s\n", SDL_GetError());
         return true;
-    ;
+    }
 
     if(TTF_Init())
     {
         fprintf(stderr,"Error iniciando SDL_ttf: %s\n",TTF_GetError());
+        return true;
+    }
+
+    if (Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 2048) < 0)
+    {
+        fprintf(stderr,"Error iniciando SDL_mixer: %s\n",Mix_GetError());
         return true;
     }
 
@@ -38,7 +46,20 @@ bool sdl_Iniciar(tJuego *juego)
         return true;
     }
 
+    //Carga de sonidos
+     char *basePath = SDL_GetBasePath();
+     char fullPath[256];
 
+     const char* archivos[4] = {"green.wav","red.wav","yellow.wav","blue.wav"};
+
+     for(int i=0;i<4;i++){
+        snprintf(fullPath, sizeof(fullPath), "%sSounds/%s", basePath, archivos[i]);
+        juego->sonidos[i] = Mix_LoadWAV(fullPath);
+        if(!juego->sonidos[i]){
+            fprintf(stderr,"Error cargando %s: %s\n", fullPath, Mix_GetError());
+        }
+     }
+     SDL_free(basePath);
 
     return false; ///FALSE ES NUESTRO CASO DE EXITO EN ESTE CASO
 }
@@ -160,6 +181,9 @@ void manejarEventos(tJuego *juego, bool *corriendo)
             {
                 int mouseX = event.button.x;
                 int mouseY = event.button.y;
+                int color = detectarBotonClick(event.button.x, event.button.y);
+                if(color != SIN_COLOR && juego->sonidos[color])
+                Mix_PlayChannel(-1, juego->sonidos[color], 0);
                 int color_clickeado = detectarBotonClick(mouseX, mouseY);
                 printf("\nclick color: %s\n", traducirColor(color_clickeado));
 
@@ -364,6 +388,14 @@ void actualizarJuego(tJuego *juego)
 
 void limpieza_juego(tJuego *juego, int Estatus_Salida)
 {
+    for(int i=0;i<4;i++){
+        if(juego->sonidos[i])
+            {
+            Mix_FreeChunk(juego->sonidos[i]);
+            juego->sonidos[i] = NULL;
+            }
+    }
+    Mix_CloseAudio();
     SDL_DestroyTexture(juego->textura_imagen);
     TTF_CloseFont(juego->texto_fuente);
     SDL_DestroyRenderer(juego->renderizar);
@@ -393,7 +425,7 @@ void mostrarPantallaPresentacion(tJuego *juego)
 
     // Mensaje secundario
     char buf[128];
-    snprintf(buf, sizeof(buf), "Presione SPACE para comenzar | M = Menu config | Esc = Salir");
+    snprintf(buf, sizeof(buf), "SPACE: Jugar | M: Menu | ESC: Salir");
     SDL_Surface *surf = TTF_RenderText_Blended(juego->texto_fuente, buf, juego->texto_color);
     SDL_Texture *tex = SDL_CreateTextureFromSurface(juego->renderizar, surf);
     SDL_Rect r2 = {20, PIXELES_VERTICALES - 60, surf->w, surf->h};
@@ -466,7 +498,7 @@ void mostrarMenuConfiguracion(tJuego *juego)
 
     // Instrucciones
     char inst[200];
-    snprintf(inst,sizeof(inst),"Enter: volver | SPACE: iniciar juego | M: toggle menu");
+    snprintf(inst,sizeof(inst),"SPACE: Jugar | M: Menu | ESC: Salir");
     SDL_Surface *sInst = TTF_RenderText_Blended(juego->texto_fuente, inst, juego->texto_color);
     SDL_Texture *tInst = SDL_CreateTextureFromSurface(juego->renderizar, sInst);
     SDL_Rect rInst = {20, PIXELES_VERTICALES - 40, sInst->w, sInst->h};
@@ -482,9 +514,22 @@ void pedirNombreJugador(tJuego *juego, bool *corriendo)
 {
     SDL_RenderClear(juego->renderizar);
 
+    const char *comentario = "Ingrese su nombre y presione ENTER";
+    SDL_Surface *sComent = TTF_RenderText_Blended(juego->texto_fuente, comentario, juego->texto_color);
+    SDL_Texture *tComent = SDL_CreateTextureFromSurface(juego->renderizar, sComent);
+    SDL_Rect rComent = {
+        40,
+        PIXELES_VERTICALES/2 - 60,          // un poco más arriba que el prompt
+        sComent->w,
+        sComent->h
+    };
+    SDL_RenderCopy(juego->renderizar, tComent, NULL, &rComent);
+    SDL_FreeSurface(sComent);
+    SDL_DestroyTexture(tComent);
+
     // Mostrar prompt
     char prompt[128];
-    snprintf(prompt, sizeof(prompt), "Ingrese su nombre (ENTER para aceptar): %s", juego->nombre_jugador);
+    snprintf(prompt, sizeof(prompt), "Nombre: %s", juego->nombre_jugador);
 
     SDL_Surface *s = TTF_RenderText_Blended(juego->texto_fuente, prompt, juego->texto_color);
     SDL_Texture *t = SDL_CreateTextureFromSurface(juego->renderizar, s);
@@ -523,20 +568,15 @@ void pedirNombreJugador(tJuego *juego, bool *corriendo)
                 if(strlen(juego->nombre_jugador) == 0)
                     strcpy(juego->nombre_jugador, "Anon");
                 // cuando confirma, arrancamos el juego
-                reiniciarJuego(juego);
-                agregar_nuevo_color_secuencia(juego);
-                juego->estado_juego = SECUENCIA;
-                SDL_StopTextInput();
+                    reiniciarJuego(juego);
+                    agregar_nuevo_color_secuencia(juego);
+                    juego->estado_juego = SECUENCIA;
+                    SDL_StopTextInput();
                 return;
             }
             else if(key == SDLK_BACKSPACE) {
                 size_t L = strlen(juego->nombre_jugador);
                 if(L > 0) juego->nombre_jugador[L-1] = '\0';
-            }
-        }
-        else if(event.type == SDL_TEXTINPUT) {   // <---- captura caracteres
-            if(strlen(juego->nombre_jugador) + strlen(event.text.text) < sizeof(juego->nombre_jugador) - 1) {
-                strcat(juego->nombre_jugador, event.text.text);
             }
         }
     }
@@ -604,7 +644,7 @@ void mostrarEstadisticas(tJuego *juego)
     SDL_DestroyTexture(t);
 
     // Instrucciones
-    s = TTF_RenderText_Blended(juego->texto_fuente, "Presione SPACE para volver a jugar o ESC para salir", blanco);
+    s = TTF_RenderText_Blended(juego->texto_fuente, "SPACE: jugar nuevamente | ESC: salir", blanco);
     t = SDL_CreateTextureFromSurface(juego->renderizar, s);
     r.y = PIXELES_VERTICALES - 60; r.x = 20; r.w = s->w; r.h = s->h;
     SDL_RenderCopy(juego->renderizar, t, NULL, &r);
