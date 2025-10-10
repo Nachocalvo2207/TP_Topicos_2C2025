@@ -47,19 +47,21 @@ bool sdl_Iniciar(tJuego *juego)
     }
 
     //Carga de sonidos
-     char *basePath = SDL_GetBasePath();
-     char fullPath[256];
+    char *basePath = SDL_GetBasePath();
+    char fullPath[256];
 
-     const char* archivos[4] = {"green.wav","red.wav","yellow.wav","blue.wav"};
+    const char* archivos[4] = {"green.wav","red.wav","yellow.wav","blue.wav"};
 
-     for(int i=0;i<4;i++){
+    for(int i=0; i<4; i++)
+    {
         snprintf(fullPath, sizeof(fullPath), "%sSounds/%s", basePath, archivos[i]);
         juego->sonidos[i] = Mix_LoadWAV(fullPath);
-        if(!juego->sonidos[i]){
+        if(!juego->sonidos[i])
+        {
             fprintf(stderr,"Error cargando %s: %s\n", fullPath, Mix_GetError());
         }
-     }
-     SDL_free(basePath);
+    }
+    SDL_free(basePath);
 
     return false; ///FALSE ES NUESTRO CASO DE EXITO EN ESTE CASO
 }
@@ -138,6 +140,7 @@ const char* traducirColor(int color)
 void manejarEventos(tJuego *juego, bool *corriendo)
 {
     SDL_Event event;
+    ///Proceso todos los eventos
     while(SDL_PollEvent(&event))
     {
         switch(event.type)
@@ -157,12 +160,12 @@ void manejarEventos(tJuego *juego, bool *corriendo)
                 /// Si arrancamos o perdimos
                 if (juego->estado_juego == INICIO)
                 {
-                   juego->estado_juego = PIDIENDO_NOMBRE;
-                   SDL_StartTextInput();
-                   printf("Juego iniciado. Nivel 1. Secuencia: %s\n", traducirColor(juego->secuencia[0]));
+                    juego->estado_juego = PIDIENDO_NOMBRE;
+                    SDL_StartTextInput();
+                    printf("Juego iniciado. Nivel 1. Secuencia: %s\n", traducirColor(juego->secuencia[0]));
                 }
 
-                    else if(juego->estado_juego == FINALIZADO)
+                else if(juego->estado_juego == FINALIZADO)
                 {
                     reiniciarJuego(juego);
                     agregar_nuevo_color_secuencia(juego); ///Genero el primer color
@@ -182,10 +185,29 @@ void manejarEventos(tJuego *juego, bool *corriendo)
                 int mouseX = event.button.x;
                 int mouseY = event.button.y;
                 int color = detectarBotonClick(event.button.x, event.button.y);
-                if(color != SIN_COLOR && juego->sonidos[color])
-                Mix_PlayChannel(-1, juego->sonidos[color], 0);
                 int color_clickeado = detectarBotonClick(mouseX, mouseY);
+
+                ///Revisar esto
+                if(color != SIN_COLOR && juego->sonidos[color])
+                    Mix_PlayChannel(-1, juego->sonidos[color], 0);
+
+                ///NO TOMA NADA EN CUENTA SI VA A LA PARTE SIN COLORES
+                if(color_clickeado == SIN_COLOR)
+                    break;
+
+
                 printf("\nclick color: %s\n", traducirColor(color_clickeado));
+
+                ///Prendo Luz color clickeado
+                juego->color_iluminado = color_clickeado;
+
+                dibujarTablero(juego);
+
+                SDL_Delay(150); ///Pausa 150ms
+
+                ///Apago color
+                juego->color_iluminado= SIN_COLOR;
+
 
                 if(color_clickeado == juego->secuencia[juego->paso_actual_jugador])
                 {
@@ -201,7 +223,7 @@ void manejarEventos(tJuego *juego, bool *corriendo)
                         printf("Nivel completado. Nuevo color agregado: %s\n", traducirColor(juego->secuencia[juego->nivel_actual - 1]));
 
                         // secuencia completa
-                        printf("Secuencia completa para Nivel %d: ", juego->nivel_actual);
+                        printf("\nSecuencia completa para Nivel %d: ", juego->nivel_actual);
                         for (int i = 0; i < juego->nivel_actual; i++)
                         {
                             printf("%s ", traducirColor(juego->secuencia[i]));
@@ -229,7 +251,7 @@ void manejarEventos(tJuego *juego, bool *corriendo)
 ///Divido el tablero en 4 partes iguales de distintos colores
 void dibujarTablero(tJuego *juego)
 {
-     SDL_SetRenderDrawColor(juego->renderizar, 0, 0, 0, 255);
+    SDL_SetRenderDrawColor(juego->renderizar, 0, 0, 0, 255);
     SDL_RenderClear(juego->renderizar);
 
     int cx = PIXELES_HORIZONTALES / 2;
@@ -249,10 +271,11 @@ void dibujarTablero(tJuego *juego)
             int dy = y - cy;
             int dist2 = dx*dx + dy*dy;
 
-            // fuera del círculo de juego → saltar
+            // fuera del círculo de juego saltar
             if(dist2 > radioExterior*radioExterior) continue;
-            // dentro del agujero central → pintamos negro
-            if(dist2 < radioInterior*radioInterior) {
+            /// dentro del agujero central → pintamos negro
+            if(dist2 < radioInterior*radioInterior)
+            {
                 SDL_SetRenderDrawColor(juego->renderizar, 0,0,0,255);
                 SDL_RenderDrawPoint(juego->renderizar, x, y);
                 continue;
@@ -262,26 +285,66 @@ void dibujarTablero(tJuego *juego)
             double ang = atan2((double)dy, (double)dx); // [-π, π]
             if(ang < 0) ang += 2*M_PI; // a [0, 2π)
 
-            // Determinar color del sector
-            // Brillo base
-            int brilloOscuro = 150;
-            int brilloBrillante = 255;
 
-            if(ang >= 0 && ang < M_PI/2) {       // 0 a 90° → abajo derecha → Azul
-                if(juego->color_iluminado == AZUL) { r=0; g=0; b=brilloBrillante; }
-                else                                { r=0; g=0; b=brilloOscuro; }
+            if(ang >= 0 && ang < M_PI/2)         // 0 a 90° → abajo derecha → Azul
+            {
+                if(juego->color_iluminado == AZUL)
+                {
+                    r=0;
+                    g=0;
+                    b=brilloBrillante;
+                }
+                else
+                {
+                    r=0;
+                    g=0;
+                    b=brilloOscuro;
+                }
             }
-            else if(ang >= M_PI/2 && ang < M_PI) { // 90 a 180° → abajo izquierda → Amarillo
-                if(juego->color_iluminado == AMARILLO) { r=brilloBrillante; g=brilloBrillante; b=0; }
-                else                                    { r=brilloOscuro; g=brilloOscuro; b=0; }
+            else if(ang >= M_PI/2 && ang < M_PI)   // 90 a 180° → abajo izquierda → Amarillo
+            {
+                if(juego->color_iluminado == AMARILLO)
+                {
+                    r=brilloBrillante;
+                    g=brilloBrillante;
+                    b=0;
+                }
+                else
+                {
+                    r=brilloOscuro;
+                    g=brilloOscuro;
+                    b=0;
+                }
             }
-            else if(ang >= M_PI && ang < 3*M_PI/2) { // 180 a 270° → arriba izquierda → Verde
-                if(juego->color_iluminado == VERDE) { r=0; g=brilloBrillante; b=0; }
-                else                                 { r=0; g=brilloOscuro; b=0; }
+            else if(ang >= M_PI && ang < 3*M_PI/2)   // 180 a 270° → arriba izquierda → Verde
+            {
+                if(juego->color_iluminado == VERDE)
+                {
+                    r=0;
+                    g=brilloBrillante;
+                    b=0;
+                }
+                else
+                {
+                    r=0;
+                    g=brilloOscuro;
+                    b=0;
+                }
             }
-            else {                                  // 270 a 360° → arriba derecha → Rojo
-                if(juego->color_iluminado == ROJO) { r=brilloBrillante; g=0; b=0; }
-                else                                { r=brilloOscuro; g=0; b=0; }
+            else                                    // 270 a 360° → arriba derecha → Rojo
+            {
+                if(juego->color_iluminado == ROJO)
+                {
+                    r=brilloBrillante;
+                    g=0;
+                    b=0;
+                }
+                else
+                {
+                    r=brilloOscuro;
+                    g=0;
+                    b=0;
+                }
             }
 
             SDL_SetRenderDrawColor(juego->renderizar, r, g, b, 255);
@@ -301,11 +364,43 @@ void dibujar_juego(tJuego *juego)
     dibujarTablero(juego);
     //Dibujar el texto encima del tablero
     SDL_RenderCopy(juego->renderizar, juego->textura_imagen, NULL, &juego->texto_rect);
+
+    ///Muestro nivel actual:
+    char texto_nivel[32];
+    snprintf(texto_nivel,sizeof(texto_nivel),"Nivel: %d", juego->nivel_actual);
+
+
     //Mostrar todo en la pantalla
     SDL_RenderPresent(juego->renderizar);
+
+    SDL_Surface *superficie_nivel = TTF_RenderText_Blended(juego->texto_fuente,texto_nivel,juego->texto_color);
+
+    if (!superficie_nivel)
+        {
+            // En un caso real, aquí deberíamos manejar el error, pero por ahora lo omitimos.
+            fprintf(stderr,"ERROR CREANDO SUPERFICIE: %s\n",SDL_GetError());
+            return; // Salimos para no continuar con un error.
+        }
+
+    SDL_Texture *textura_nivel = SDL_CreateTextureFromSurface(juego->renderizar,superficie_nivel);
+
+    SDL_Rect rect_Nivel;
+
+    rect_Nivel.w = superficie_nivel->w; // Ancho del texto
+    rect_Nivel.h = superficie_nivel->h; // Alto del texto
+    rect_Nivel.x = PIXELES_HORIZONTALES - rect_Nivel.w - 15; // Coordenada X (con 15px de margen derecho)
+    rect_Nivel.y = PIXELES_VERTICALES - rect_Nivel.h - 15;   // Coordenada Y (con 15px de margen inferior)
+
+    SDL_RenderCopy(juego->renderizar, textura_nivel, NULL, &rect_Nivel);
+
+    SDL_FreeSurface(superficie_nivel);
+    SDL_DestroyTexture(textura_nivel);
+
+
+    SDL_RenderPresent(juego->renderizar);
+
+
 }
-
-
 int detectarBotonClick(int x, int y)
 {
     int cx = PIXELES_HORIZONTALES / 2;
@@ -388,12 +483,13 @@ void actualizarJuego(tJuego *juego)
 
 void limpieza_juego(tJuego *juego, int Estatus_Salida)
 {
-    for(int i=0;i<4;i++){
+    for(int i=0; i<4; i++)
+    {
         if(juego->sonidos[i])
-            {
+        {
             Mix_FreeChunk(juego->sonidos[i]);
             juego->sonidos[i] = NULL;
-            }
+        }
     }
     Mix_CloseAudio();
     SDL_DestroyTexture(juego->textura_imagen);
@@ -436,7 +532,7 @@ void mostrarPantallaPresentacion(tJuego *juego)
     SDL_RenderPresent(juego->renderizar);
 }
 
-// --- Menú de configuración gráfico (mínimo) ---
+/// --- Menú de configuración gráfico (mínimo) ---Hay que hacerlo
 void mostrarMenuConfiguracion(tJuego *juego)
 {
     SDL_RenderClear(juego->renderizar);
@@ -485,7 +581,8 @@ void mostrarMenuConfiguracion(tJuego *juego)
     SDL_DestroyTexture(t3);
 
     // Si modo Mozart, mostrar ruta (si existe)
-    if(juego->config.modo == MODO_MOZART) {
+    if(juego->config.modo == MODO_MOZART)
+    {
         char opt4[256];
         snprintf(opt4,sizeof(opt4),"Archivo melodia: %s  (tecla L para cargar nombre de archivo)", juego->config.ruta_melodia);
         SDL_Surface *s4 = TTF_RenderText_Blended(juego->texto_fuente, opt4, juego->texto_color);
@@ -517,7 +614,8 @@ void pedirNombreJugador(tJuego *juego, bool *corriendo)
     const char *comentario = "Ingrese su nombre y presione ENTER";
     SDL_Surface *sComent = TTF_RenderText_Blended(juego->texto_fuente, comentario, juego->texto_color);
     SDL_Texture *tComent = SDL_CreateTextureFromSurface(juego->renderizar, sComent);
-    SDL_Rect rComent = {
+    SDL_Rect rComent =
+    {
         40,
         PIXELES_VERTICALES/2 - 60,          // un poco más arriba que el prompt
         sComent->w,
@@ -546,7 +644,8 @@ void pedirNombreJugador(tJuego *juego, bool *corriendo)
     {
         if(event.type == SDL_QUIT)
         {
-            *corriendo = false; return;
+            *corriendo = false;
+            return;
         }
 
         if (event.type == SDL_TEXTINPUT)
@@ -559,22 +658,25 @@ void pedirNombreJugador(tJuego *juego, bool *corriendo)
         {
             SDL_Keycode key = event.key.keysym.sym;
 
-            if(key == SDLK_ESCAPE) {
+            if(key == SDLK_ESCAPE)
+            {
                 *corriendo = false;
                 SDL_StopTextInput();
                 return;
             }
-            else if(key == SDLK_RETURN) {
+            else if(key == SDLK_RETURN)
+            {
                 if(strlen(juego->nombre_jugador) == 0)
                     strcpy(juego->nombre_jugador, "Anon");
                 // cuando confirma, arrancamos el juego
-                    reiniciarJuego(juego);
-                    agregar_nuevo_color_secuencia(juego);
-                    juego->estado_juego = SECUENCIA;
-                    SDL_StopTextInput();
+                reiniciarJuego(juego);
+                agregar_nuevo_color_secuencia(juego);
+                juego->estado_juego = SECUENCIA;
+                SDL_StopTextInput();
                 return;
             }
-            else if(key == SDLK_BACKSPACE) {
+            else if(key == SDLK_BACKSPACE)
+            {
                 size_t L = strlen(juego->nombre_jugador);
                 if(L > 0) juego->nombre_jugador[L-1] = '\0';
             }
@@ -598,7 +700,10 @@ void mostrarEstadisticas(tJuego *juego)
     // Título
     s = TTF_RenderText_Blended(juego->texto_fuente, "ESTADISTICAS DEL JUEGO", blanco);
     t = SDL_CreateTextureFromSurface(juego->renderizar, s);
-    r = (SDL_Rect){(PIXELES_HORIZONTALES - s->w)/2, y, s->w, s->h};
+    r = (SDL_Rect)
+    {
+        (PIXELES_HORIZONTALES - s->w)/2, y, s->w, s->h
+    };
     SDL_RenderCopy(juego->renderizar, t, NULL, &r);
     SDL_FreeSurface(s);
     SDL_DestroyTexture(t);
@@ -608,7 +713,10 @@ void mostrarEstadisticas(tJuego *juego)
     snprintf(linea, sizeof(linea), "Jugador: %s", juego->nombre_jugador);
     s = TTF_RenderText_Blended(juego->texto_fuente, linea, blanco);
     t = SDL_CreateTextureFromSurface(juego->renderizar, s);
-    r = (SDL_Rect){50, y, s->w, s->h};
+    r = (SDL_Rect)
+    {
+        50, y, s->w, s->h
+    };
     SDL_RenderCopy(juego->renderizar, t, NULL, &r);
     SDL_FreeSurface(s);
     SDL_DestroyTexture(t);
@@ -618,7 +726,10 @@ void mostrarEstadisticas(tJuego *juego)
     snprintf(linea, sizeof(linea), "Partidas jugadas: %d", juego->partidas_jugadas);
     s = TTF_RenderText_Blended(juego->texto_fuente, linea, blanco);
     t = SDL_CreateTextureFromSurface(juego->renderizar, s);
-    r.y = y; r.x = 50; r.w = s->w; r.h = s->h;
+    r.y = y;
+    r.x = 50;
+    r.w = s->w;
+    r.h = s->h;
     SDL_RenderCopy(juego->renderizar, t, NULL, &r);
     SDL_FreeSurface(s);
     SDL_DestroyTexture(t);
@@ -628,7 +739,10 @@ void mostrarEstadisticas(tJuego *juego)
     snprintf(linea, sizeof(linea), "Partidas ganadas: %d", juego->partidas_ganadas);
     s = TTF_RenderText_Blended(juego->texto_fuente, linea, blanco);
     t = SDL_CreateTextureFromSurface(juego->renderizar, s);
-    r.y = y; r.x = 50; r.w = s->w; r.h = s->h;
+    r.y = y;
+    r.x = 50;
+    r.w = s->w;
+    r.h = s->h;
     SDL_RenderCopy(juego->renderizar, t, NULL, &r);
     SDL_FreeSurface(s);
     SDL_DestroyTexture(t);
@@ -638,7 +752,10 @@ void mostrarEstadisticas(tJuego *juego)
     snprintf(linea, sizeof(linea), "Partidas perdidas: %d", juego->partidas_perdidas);
     s = TTF_RenderText_Blended(juego->texto_fuente, linea, blanco);
     t = SDL_CreateTextureFromSurface(juego->renderizar, s);
-    r.y = y; r.x = 50; r.w = s->w; r.h = s->h;
+    r.y = y;
+    r.x = 50;
+    r.w = s->w;
+    r.h = s->h;
     SDL_RenderCopy(juego->renderizar, t, NULL, &r);
     SDL_FreeSurface(s);
     SDL_DestroyTexture(t);
@@ -646,7 +763,10 @@ void mostrarEstadisticas(tJuego *juego)
     // Instrucciones
     s = TTF_RenderText_Blended(juego->texto_fuente, "SPACE: jugar nuevamente | ESC: salir", blanco);
     t = SDL_CreateTextureFromSurface(juego->renderizar, s);
-    r.y = PIXELES_VERTICALES - 60; r.x = 20; r.w = s->w; r.h = s->h;
+    r.y = PIXELES_VERTICALES - 60;
+    r.x = 20;
+    r.w = s->w;
+    r.h = s->h;
     SDL_RenderCopy(juego->renderizar, t, NULL, &r);
     SDL_FreeSurface(s);
     SDL_DestroyTexture(t);
@@ -664,13 +784,19 @@ int cargarMelodiaDesdeArchivo(const char *ruta, tJuego *juego)
     while(!feof(f) && count < MAX_SEQ)
     {
         int v;
-        if(fscanf(f, "%d", &v) == 1) {
-            if(v >= 0 && v < juego->config.num_botones) {
+        if(fscanf(f, "%d", &v) == 1)
+        {
+            if(v >= 0 && v < juego->config.num_botones)
+            {
                 juego->secuencia[count++] = v;
-            } else {
+            }
+            else
+            {
                 // si el archivo tiene valores fuera de rango, se ignora
             }
-        } else {
+        }
+        else
+        {
             break;
         }
     }
@@ -683,7 +809,7 @@ int cargarMelodiaDesdeArchivo(const char *ruta, tJuego *juego)
 int calcularDuracionPorNota(int duracion_inicial_ms, int cantidad_notas)
 {
     double dur = (double)duracion_inicial_ms;
-    for(int i=1;i<=(cantidad_notas-1);i++)
+    for(int i=1; i<=(cantidad_notas-1); i++)
     {
         dur *= 0.97; // reduce 3% por nota adicional
     }

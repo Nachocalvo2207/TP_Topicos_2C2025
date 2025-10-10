@@ -1,5 +1,17 @@
 #include "TP_Topicos.h"
 
+/// Apellido, nombre: Calvo, Ignacio
+/// DNI: 41162300
+/// Entrega: Si
+
+/// Apellido, nombre: Calvo, Ignacio
+/// DNI: 41162300
+/// Entrega: Si
+
+/// Apellido, nombre: Calvo, Ignacio
+/// DNI: 41162300
+/// Entrega: Si
+
 int main(int argc, char* argv[])
 {
     ///SDL_init( SDL_INIT_EVERYTHING );

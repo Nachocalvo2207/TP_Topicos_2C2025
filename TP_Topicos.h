@@ -11,13 +11,16 @@
 #include <math.h>
 
 ///PIXELES (Esta asi en el TP)
-#define TITULO "SIMON_DICE"
+#define TITULO "SIMON"
 #define PIXELES_HORIZONTALES 800
 #define PIXELES_VERTICALES 600
 
 ///FUENTE
 #define TEXT_SIZE 40
 
+///COLORES
+#define brilloOscuro 150
+#define brilloBrillante 255
 ///MACROS
 #define OK_SALIDA 0
 #define ERROR_SALIDA 1
@@ -38,6 +41,7 @@
 #define FINALIZADO 3
 #define MENU_CONFIG 4
 #define PIDIENDO_NOMBRE 5
+#define DURACION_INICIAL 2000 ///Esto son MS
 
 ///MODOS
 #define MODO_SCHONBERG 0
@@ -67,6 +71,7 @@ typedef struct
     Uint32 tiempo_ultimo_cambio;
     int paso_secuencia;
     int estado_juego; ///Para chequear si se encuentra jugando
+    Mix_Chunk *sonidos[4];
     tConfig config;
     char nombre_jugador[64];
     int partidas_jugadas;
