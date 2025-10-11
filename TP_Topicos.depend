@@ -1,5 +1,5 @@
 # depslib dependency file v1.0
-1759378374 source:c:\users\o014851\desktop\nacho\unlam\tp_topicos\main.c
+1760217312 source:c:\users\o014851\desktop\nacho\unlam\tp_topicos\main.c
 	"TP_Topicos.h"
 
 1748917206 c:\users\o014851\desktop\nacho\unlam\tp_topicos\lib\sdl2-2.32.8\x86_64-w64-mingw32\include\sdl2\sdl.h
@@ -444,16 +444,19 @@
 	"begin_code.h"
 	"close_code.h"
 
-1759381826 source:c:\users\o014851\desktop\nacho\unlam\tp_topicos\tp_topicos.c
+1760219149 source:c:\users\o014851\desktop\nacho\unlam\tp_topicos\tp_topicos.c
 	"TP_Topicos.h"
 
-1759380275 c:\users\o014851\desktop\nacho\unlam\tp_topicos\tp_topicos.h
+1760216137 c:\users\o014851\desktop\nacho\unlam\tp_topicos\tp_topicos.h
 	<SDL2/SDL.h>
 	<SDL2/SDL_ttf.h>
+	<SDL2/SDL_mixer.h>
 	<stdio.h>
 	<stdlib.h>
 	<stdbool.h>
 	<time.h>
+	<string.h>
+	<math.h>
 
 1735843588 c:\users\o014851\desktop\nacho\unlam\tp_topicos\lib\sdl2_ttf-2.24.0\x86_64-w64-mingw32\include\sdl2\sdl_ttf.h
 	"SDL.h"
@@ -932,4 +935,13 @@
 
 1760127711 source:c:\users\o014851\desktop\nacho\unlam\tp_topicos\tp_topicos_2c2025\tp_topicos.c
 	"TP_Topicos.h"
+
+1738973080 c:\users\o014851\desktop\nacho\unlam\tp_topicos\lib\sdl2_mixer-2.8.1\x86_64-w64-mingw32\include\sdl2\sdl_mixer.h
+	"SDL_stdinc.h"
+	"SDL_rwops.h"
+	"SDL_audio.h"
+	"SDL_endian.h"
+	"SDL_version.h"
+	"begin_code.h"
+	"close_code.h"
 

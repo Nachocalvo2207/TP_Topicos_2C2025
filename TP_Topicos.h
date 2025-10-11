@@ -24,6 +24,9 @@
 ///MACROS
 #define OK_SALIDA 0
 #define ERROR_SALIDA 1
+#define DOBLE_CAPACIDAD 2
+#define OPCIONES 3
+#define DISTANCIA_OPCIONES 70
 #define MAX_SEQ 5
 
 ///Botones
@@ -54,6 +57,8 @@ typedef struct {
     char ruta_melodia[256];    // RUTA DEL ARCHIVO PARA MODO Mozart
 } tConfig;
 
+
+
 ///Estructuras
 typedef struct
 {
@@ -61,18 +66,23 @@ typedef struct
     SDL_Renderer *renderizar;
     TTF_Font *texto_fuente;
     SDL_Color texto_color;
-    SDL_Rect texto_rect; ///No me se la traduccion
+    SDL_Rect texto_rect;
     SDL_Texture *textura_imagen;
     SDL_Rect sprite_rect;
-    int secuencia[MAX_SEQ]; ///Secuencia de colores generada
+    SDL_Rect rect_btn_jugar;
+    SDL_Rect rect_btn_config;
+    SDL_Rect rect_btn_salir;
+    Uint32 tiempo_ultimo_cambio;
+    Mix_Chunk *sonidos[4];
+    tConfig config;
     int nivel_actual; ///Nivel al que llego el jugador
     int paso_actual_jugador; /// Cuando esta realizando la secuencia
     int color_iluminado;
-    Uint32 tiempo_ultimo_cambio;
     int paso_secuencia;
+    int *secuencia;
+    size_t capacidad_secuencia; ///Cap. de niveles en memoria
     int estado_juego; ///Para chequear si se encuentra jugando
-    Mix_Chunk *sonidos[4];
-    tConfig config;
+
     char nombre_jugador[64];
     int partidas_jugadas;
     int partidas_ganadas;

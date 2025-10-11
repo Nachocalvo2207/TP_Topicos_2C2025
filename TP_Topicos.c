@@ -46,6 +46,17 @@ bool sdl_Iniciar(tJuego *juego)
         return true;
     }
 
+    ///Cargo cant. niveles iniciales con mem.dinamica:
+    juego->capacidad_secuencia = MAX_SEQ;
+    juego->secuencia = malloc(juego->capacidad_secuencia * sizeof(int));
+    if(!juego->secuencia)
+    {
+        fprintf(stderr, "Error: No se pudo reservar memoria para la secuencia.\n");
+        return true;
+    }
+
+
+
     //Carga de sonidos
     char *basePath = SDL_GetBasePath();
     char fullPath[256];
@@ -75,6 +86,11 @@ void reiniciarJuego(tJuego *juego)
     juego->paso_secuencia = 0;
     juego->color_iluminado = SIN_COLOR; // -1 = Ningún color iluminado
     juego->tiempo_ultimo_cambio = 0;
+    ///Datos de configuracion
+    juego->config.num_botones = 4; // Un valor inicial sensato
+    juego->config.duracion_inicial_ms = DURACION_INICIAL; // 2000, como definiste en el .h
+    juego->config.modo = MODO_SCHONBERG; // Modo por defecto
+    strcpy(juego->config.ruta_melodia, "ninguno"); // Un texto inicial para la ruta
 }
 
 
@@ -136,99 +152,153 @@ const char* traducirColor(int color)
         return "DESCONOCIDO";
     }
 }
-// VERSIÓN CORREGIDA
+
 void manejarEventos(tJuego *juego, bool *corriendo)
 {
     SDL_Event event;
-    ///Proceso todos los eventos
-    while(SDL_PollEvent(&event))
+
+    // Procesa todos los eventos pendientes en la cola
+    while (SDL_PollEvent(&event))
     {
-        switch(event.type)
+        switch (event.type)
         {
         case SDL_QUIT:
             *corriendo = false;
             break;
 
         case SDL_KEYDOWN:
-            switch(event.key.keysym.scancode)
+        {
+            ///Cierro todo con ESC
+            if (event.key.keysym.scancode == SDL_SCANCODE_ESCAPE)
             {
-            case SDL_SCANCODE_ESCAPE:
                 *corriendo = false;
                 break;
-
-            case SDL_SCANCODE_SPACE:
-                /// Si arrancamos o perdimos
-                if (juego->estado_juego == INICIO)
+            }
+            // Usamos un switch principal para el estado del juego
+            switch (juego->estado_juego)
+            {
+            case INICIO:
+                switch (event.key.keysym.scancode)
                 {
+                case SDL_SCANCODE_1:
                     juego->estado_juego = PIDIENDO_NOMBRE;
                     SDL_StartTextInput();
-                    printf("Juego iniciado. Nivel 1. Secuencia: %s\n", traducirColor(juego->secuencia[0]));
+                    break;
+                case SDL_SCANCODE_2:
+                    juego->estado_juego = MENU_CONFIG;
+                    break;
+                case SDL_SCANCODE_ESCAPE:
+                    *corriendo = false;
+                    break;
+                default:
+                    break;
                 }
+                break;
 
-                else if(juego->estado_juego == FINALIZADO)
+            case MENU_CONFIG:
+                switch (event.key.keysym.scancode)
                 {
-                    reiniciarJuego(juego);
-                    agregar_nuevo_color_secuencia(juego); ///Genero el primer color
-                    juego->estado_juego = SECUENCIA;      /// Modifico el estado del juego
-                }
-                break;
-            default:
-                break;
-            }
-            break;
 
-        /// Acciones que realizamos con el mouse
-        case SDL_MOUSEBUTTONDOWN:
-        {
-            if(juego->estado_juego == JUGANDO)
-            {
-                int mouseX = event.button.x;
-                int mouseY = event.button.y;
-                int color = detectarBotonClick(event.button.x, event.button.y);
-                int color_clickeado = detectarBotonClick(mouseX, mouseY);
+                ///Ir al inicio nuevamente
+                case SDL_SCANCODE_M:
+                    juego->estado_juego = INICIO;
+                    break;
 
-                ///Revisar esto
-                if(color != SIN_COLOR && juego->sonidos[color])
-                    Mix_PlayChannel(-1, juego->sonidos[color], 0);
-
-                ///NO TOMA NADA EN CUENTA SI VA A LA PARTE SIN COLORES
-                if(color_clickeado == SIN_COLOR)
+                ///Cant. Botones SIMON
+                case SDL_SCANCODE_3:
+                    juego->config.num_botones = 3;
+                    break;
+                case SDL_SCANCODE_4:
+                    juego->config.num_botones = 4;
+                    break;
+                case SDL_SCANCODE_5:
+                    juego->config.num_botones = 5;
+                    break;
+                case SDL_SCANCODE_6:
+                    juego->config.num_botones = 6;
+                    break;
+                case SDL_SCANCODE_7:
+                    juego->config.num_botones = 7;
+                    break;
+                case SDL_SCANCODE_8:
+                    juego->config.num_botones = 8;
+                    break;
+                case SDL_SCANCODE_E:
+                    juego->config.duracion_inicial_ms += 100;
                     break;
 
 
-                printf("\nclick color: %s\n", traducirColor(color_clickeado));
+                ///Aumentar velocidad
+                case SDL_SCANCODE_H:
+                    if (juego->config.duracion_inicial_ms > 200)
+                    {
+                        juego->config.duracion_inicial_ms -= 100;
+                    }
+                    break;
+                ///Modo de juego
+                case SDL_SCANCODE_T:
+                    juego->config.modo = (juego->config.modo == MODO_SCHONBERG) ? MODO_MOZART : MODO_SCHONBERG;
+                    break;
+                default:
+                    break;
+                }
+                break; ///FIN MENU_CONFIG
 
-                ///Prendo Luz color clickeado
+            case FINALIZADO:
+                switch (event.key.keysym.scancode)
+                {
+                case SDL_SCANCODE_SPACE:
+                    reiniciarJuego(juego);
+                    agregar_nuevo_color_secuencia(juego);
+                    juego->estado_juego = SECUENCIA;
+                    break;
+
+                default:
+                    break;
+                }
+                break; /// Fin FINALIZADO
+
+            default: // Para cualquier otro estado (JUGANDO, SECUENCIA, etc.)
+                if(event.key.keysym.scancode == SDL_SCANCODE_ESCAPE)
+                    *corriendo = false;
+                break;
+            }
+            break; // Fin del case SDL_KEYDOWN
+        }
+
+        // Evento de clic del mouse
+        case SDL_MOUSEBUTTONDOWN:
+        {
+            // ... (tu lógica para el clic del mouse queda exactamente igual) ...
+            if (juego->estado_juego == JUGANDO)
+            {
+                int mouseX = event.button.x;
+                int mouseY = event.button.y;
+                int color_clickeado = detectarBotonClick(mouseX, mouseY);
+
+                if (color_clickeado == SIN_COLOR)
+                {
+                    break;
+                }
+
                 juego->color_iluminado = color_clickeado;
-
+                if(juego->sonidos[color_clickeado])
+                {
+                    Mix_PlayChannel(-1, juego->sonidos[color_clickeado], 0);
+                }
                 dibujarTablero(juego);
+                SDL_Delay(150);
+                juego->color_iluminado = SIN_COLOR;
 
-                SDL_Delay(150); ///Pausa 150ms
-
-                ///Apago color
-                juego->color_iluminado= SIN_COLOR;
-
-
-                if(color_clickeado == juego->secuencia[juego->paso_actual_jugador])
+                if (color_clickeado == juego->secuencia[juego->paso_actual_jugador])
                 {
                     juego->paso_actual_jugador++;
-
-                    if(juego->paso_actual_jugador >= juego->nivel_actual)
+                    if (juego->paso_actual_jugador >= juego->nivel_actual)
                     {
                         juego->nivel_actual++;
-                        agregar_nuevo_color_secuencia(juego); //
+                        agregar_nuevo_color_secuencia(juego);
                         juego->estado_juego = SECUENCIA;
                         juego->paso_actual_jugador = 0;
-                        // Vemos el nuevo color que se añadió para el siguiente nivel.
-                        printf("Nivel completado. Nuevo color agregado: %s\n", traducirColor(juego->secuencia[juego->nivel_actual - 1]));
-
-                        // secuencia completa
-                        printf("\nSecuencia completa para Nivel %d: ", juego->nivel_actual);
-                        for (int i = 0; i < juego->nivel_actual; i++)
-                        {
-                            printf("%s ", traducirColor(juego->secuencia[i]));
-                        }
-
                     }
                 }
                 else
@@ -241,8 +311,8 @@ void manejarEventos(tJuego *juego, bool *corriendo)
             break;
         }
 
-        }
-    }
+        } // Fin del switch(event.type)
+    } // Fin del while(SDL_PollEvent)
 }
 
 
@@ -370,17 +440,16 @@ void dibujar_juego(tJuego *juego)
     snprintf(texto_nivel,sizeof(texto_nivel),"Nivel: %d", juego->nivel_actual);
 
 
-    //Mostrar todo en la pantalla
+    ///Mostrar todo en la pantalla
     SDL_RenderPresent(juego->renderizar);
 
     SDL_Surface *superficie_nivel = TTF_RenderText_Blended(juego->texto_fuente,texto_nivel,juego->texto_color);
 
     if (!superficie_nivel)
-        {
-            // En un caso real, aquí deberíamos manejar el error, pero por ahora lo omitimos.
-            fprintf(stderr,"ERROR CREANDO SUPERFICIE: %s\n",SDL_GetError());
-            return; // Salimos para no continuar con un error.
-        }
+    {
+        fprintf(stderr,"ERROR CREANDO SUPERFICIE: %s\n",SDL_GetError());
+        return;
+    }
 
     SDL_Texture *textura_nivel = SDL_CreateTextureFromSurface(juego->renderizar,superficie_nivel);
 
@@ -429,12 +498,27 @@ int detectarBotonClick(int x, int y)
 
 void agregar_nuevo_color_secuencia(tJuego *juego)
 {
-    ///ACA HAY QUE PONER UN REALLOC PARA MAX_SEQ, que vaya aumentando la memoria a medida que pasa el tiempo
-    int indice = juego->nivel_actual - 1;
-    if (indice < MAX_SEQ)
+    ///Realloc para agregar memoria en caso de que haya llegado a la maxima sec
+    if(juego->nivel_actual >= juego->capacidad_secuencia)
     {
-        juego->secuencia[indice] = rand() % 4;
+        size_t nueva_capacidad = juego->capacidad_secuencia * DOBLE_CAPACIDAD;
+
+        int *aux = realloc(juego->secuencia,nueva_capacidad *  sizeof(int));
+
+        if(!aux)
+        {
+            fprintf(stderr, "Error: No se pudo ampliar la memoria para la secuencia.\n");
+            return;
+        }
+
+        juego->secuencia = aux;
+        juego->capacidad_secuencia = nueva_capacidad;
+
     }
+
+    int indice = juego->nivel_actual - 1;
+    juego->secuencia[indice] = rand() % 4;
+
 }
 
 
@@ -481,25 +565,7 @@ void actualizarJuego(tJuego *juego)
 }
 
 
-void limpieza_juego(tJuego *juego, int Estatus_Salida)
-{
-    for(int i=0; i<4; i++)
-    {
-        if(juego->sonidos[i])
-        {
-            Mix_FreeChunk(juego->sonidos[i]);
-            juego->sonidos[i] = NULL;
-        }
-    }
-    Mix_CloseAudio();
-    SDL_DestroyTexture(juego->textura_imagen);
-    TTF_CloseFont(juego->texto_fuente);
-    SDL_DestroyRenderer(juego->renderizar);
-    SDL_DestroyWindow(juego->ventana);
-    TTF_Quit();
-    SDL_Quit();
-    exit(Estatus_Salida);
-}
+
 
 void mostrarPantallaPresentacion(tJuego *juego)
 {
@@ -515,19 +581,31 @@ void mostrarPantallaPresentacion(tJuego *juego)
     {
         SDL_Rect dest = juego->texto_rect;
         // Ajustar posición hacia arriba
-        dest.y = 80;
+        dest.y = 100;
         SDL_RenderCopy(juego->renderizar, juego->textura_imagen, NULL, &dest);
     }
+    const char *opciones_menu[] = {"1. Jugar", "2. Configuracion", "Esc. Salir"};
+    int y_inicial = 250; ///Donde arranco en Y
 
-    // Mensaje secundario
-    char buf[128];
-    snprintf(buf, sizeof(buf), "SPACE: Jugar | M: Menu | ESC: Salir");
-    SDL_Surface *surf = TTF_RenderText_Blended(juego->texto_fuente, buf, juego->texto_color);
-    SDL_Texture *tex = SDL_CreateTextureFromSurface(juego->renderizar, surf);
-    SDL_Rect r2 = {20, PIXELES_VERTICALES - 60, surf->w, surf->h};
-    SDL_FreeSurface(surf);
-    SDL_RenderCopy(juego->renderizar, tex, NULL, &r2);
-    SDL_DestroyTexture(tex);
+    for (int i = 0; i < OPCIONES; i++)
+    {
+        SDL_Surface *superficie = TTF_RenderText_Blended(juego->texto_fuente, opciones_menu[i], juego->texto_color);
+        SDL_Texture *textura = SDL_CreateTextureFromSurface(juego->renderizar, superficie);
+
+        SDL_Rect rectBoton;
+        rectBoton.w = superficie->w;
+        rectBoton.h = superficie->h;
+        rectBoton.x = (PIXELES_HORIZONTALES - rectBoton.w) / 2; /// Centrado X
+        rectBoton.y = y_inicial + (i * DISTANCIA_OPCIONES); /// Espacio entre opciones
+
+        SDL_RenderCopy(juego->renderizar, textura, NULL, &rectBoton);
+
+        // ¡Importante liberar los recursos temporales en cada iteración!
+        SDL_FreeSurface(superficie);
+        SDL_DestroyTexture(textura);
+    }
+
+
 
     SDL_RenderPresent(juego->renderizar);
 }
@@ -814,4 +892,25 @@ int calcularDuracionPorNota(int duracion_inicial_ms, int cantidad_notas)
         dur *= 0.97; // reduce 3% por nota adicional
     }
     return (int)(dur + 0.5);
+}
+
+
+void limpieza_juego(tJuego *juego, int Estatus_Salida)
+{
+    for(int i=0; i<4; i++)
+    {
+        if(juego->sonidos[i])
+        {
+            Mix_FreeChunk(juego->sonidos[i]);
+            juego->sonidos[i] = NULL;
+        }
+    }
+    Mix_CloseAudio();
+    SDL_DestroyTexture(juego->textura_imagen);
+    TTF_CloseFont(juego->texto_fuente);
+    SDL_DestroyRenderer(juego->renderizar);
+    SDL_DestroyWindow(juego->ventana);
+    TTF_Quit();
+    SDL_Quit();
+    exit(Estatus_Salida);
 }
