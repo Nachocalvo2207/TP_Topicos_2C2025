@@ -23,6 +23,8 @@ int main(int argc, char* argv[])
     if (crearTexto(&juego)) {
         limpieza_juego(&juego, ERROR_SALIDA);
     }
+    inicializarConfiguracion(&juego);
+    cargar_estadisticas(&juego);
 
     reiniciarJuego(&juego); // Estado inicial es INICIO
 
@@ -52,7 +54,7 @@ int main(int argc, char* argv[])
                 dibujar_juego(&juego); // Esta función dibuja el tablero
                 break;
             case FINALIZADO:
-                mostrarEstadisticas(&juego);
+                mostrar_estadisticas(&juego);
                 break;
         }
     }
