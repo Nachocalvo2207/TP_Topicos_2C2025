@@ -90,21 +90,18 @@ void inicializarConfiguracion(tJuego *juego)
 
 void reiniciarJuego(tJuego *juego)
 {
-    // Esta función AHORA solo resetea los valores de una partida
     juego->estado_juego = INICIO;
     juego->nivel_actual = 1;
     juego->paso_actual_jugador = 0;
     juego->paso_secuencia = 0;
     juego->color_iluminado = SIN_COLOR;
     juego->tiempo_ultimo_cambio = 0;
-    juego->nombre_jugador[0] = '\0'; // ¡ESTO ES CRUCIAL!
-
+    juego->nombre_jugador[0] = '\0';
 }
 
 
 void palabra_mayus(char *palabra)
 {
-    // Mientras no lleguemos al final de la cadena (el carácter '\0')
     while (*palabra)
     {
         *palabra = toupper((unsigned char)*palabra);
@@ -191,7 +188,7 @@ void manejarEventos(tJuego *juego, bool *corriendo)
 {
     SDL_Event event;
 
-    // Procesa todos los eventos pendientes en la cola
+    /// Procesa todos los eventos pendientes en la cola
     while (SDL_PollEvent(&event))
     {
         switch (event.type)
