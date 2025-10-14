@@ -4,8 +4,8 @@
 /// DNI: 41162300
 /// Entrega: Si
 
-/// Apellido, nombre: Calvo, Ignacio
-/// DNI: 41162300
+/// Apellido, nombre: Benito, Pablo
+/// DNI: 43569575
 /// Entrega: Si
 
 /// Apellido, nombre: Calvo, Ignacio
@@ -16,6 +16,7 @@ int main(int argc, char* argv[])
 {
     tJuego juego;
     bool corriendo = true;
+    srand(time(NULL));
 
     if (sdl_Iniciar(&juego)) {
         limpieza_juego(&juego, ERROR_SALIDA);

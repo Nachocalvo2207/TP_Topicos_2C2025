@@ -112,7 +112,7 @@ void limpieza_juego(tJuego *juego, int Estatus_Salida);
 bool crearTexto(tJuego *juego);
 void actualizarJuego(tJuego *juego);
 void palabra_mayus(char *palabra);
-
+int generar_tono(int limite, int anterior, int indice);
 
 ///Funciones del Simon
 void inicializarConfiguracion(tJuego *juego);

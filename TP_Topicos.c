@@ -563,6 +563,21 @@ int detectarBotonClick(int x, int y)
     return AZUL;
 }
 
+/// GENERO UN TONO AL AZAR
+int generar_tono(int limite, int anterior, int indice){
+    int num_tono;
+    printf("%d", anterior);
+
+    if(indice != 1){
+        do{
+            num_tono = rand() % limite;
+        }while(num_tono == anterior);tmb
+    }else{
+        num_tono = rand() % limite;
+    }
+
+    return num_tono;
+}
 
 void agregar_nuevo_color_secuencia(tJuego *juego)
 {
@@ -585,10 +600,8 @@ void agregar_nuevo_color_secuencia(tJuego *juego)
     }
 
     int indice = juego->nivel_actual - 1;
-    juego->secuencia[indice] = rand() % 4;
-
+    juego->secuencia[indice] = generar_tono(juego->config.num_botones, juego->secuencia[indice], juego->nivel_actual);
 }
-
 
 /// REALIZO LA SECUENCIA DE COLORES
 void actualizarJuego(tJuego *juego)
