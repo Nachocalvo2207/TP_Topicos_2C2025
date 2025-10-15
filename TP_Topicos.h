@@ -35,12 +35,17 @@
 #define DURACION_INICIAL 2000 ///Esto son MS
 #define PAUSA_ENTRE_NOTAS 150
 #define DURACION_FLASH_JUGADOR 75
+
 ///Botones
 #define SIN_COLOR -1
 #define VERDE 0
 #define ROJO 1
 #define AMARILLO 2
 #define AZUL 3
+#define NARANJA 4
+#define ROSA 5
+#define VIOLETA 6
+#define AQUAMARINO 7
 
 
 ///ESTADOS
@@ -73,6 +78,15 @@ typedef struct
     int nivel_alcanzado;
 }tEstadistica;
 
+typedef struct{
+    int r_brillante;
+    int g_brillante;
+    int b_brillante;
+    int r_oscuro;
+    int g_oscuro;
+    int b_oscuro;
+} tColorData;
+
 ///Estructuras
 typedef struct
 {
@@ -88,8 +102,9 @@ typedef struct
     SDL_Rect rect_btn_config;
     SDL_Rect rect_btn_salir;
     Uint32 tiempo_ultimo_cambio;
-    Mix_Chunk *sonidos[4];
+    Mix_Chunk *sonidos[8];
     tConfig config;
+    tColorData lista_colores[8];
     int nivel_actual; ///Nivel al que llego el jugador
     int nivel_maximo; ///Maximo nivel alcanzado (Estadisticas)
     int paso_actual_jugador; /// Cuando esta realizando la secuencia
@@ -105,7 +120,6 @@ typedef struct
 } tJuego;
 
 
-
 ///Funciones generales
 bool sdl_Iniciar(tJuego *juego);
 void limpieza_juego(tJuego *juego, int Estatus_Salida);
@@ -116,11 +130,12 @@ int generar_tono(int limite, int anterior, int indice);
 
 ///Funciones del Simon
 void inicializarConfiguracion(tJuego *juego);
+void inicializarColores(tJuego *juego);
 void reiniciarJuego(tJuego *juego);
 void dibujarTablero(tJuego *juego);
 void dibujar_texto(tJuego* juego, const char* texto, int x, int y, SDL_Color color);
 void dibujar_juego(tJuego *juego);
-int detectarBotonClick(int x, int y);
+int detectarBotonClick(int x, int y, int N);
 void agregar_nuevo_color_secuencia(tJuego *juego);
 void pedirNombreJugador(tJuego *juego, bool *corriendo);
 void manejarEventos(tJuego *juego,bool *corriendo);

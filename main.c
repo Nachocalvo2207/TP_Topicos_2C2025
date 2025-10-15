@@ -25,6 +25,7 @@ int main(int argc, char* argv[])
         limpieza_juego(&juego, ERROR_SALIDA);
     }
     inicializarConfiguracion(&juego);
+    inicializarColores(&juego);
     cargar_estadisticas(&juego);
 
     reiniciarJuego(&juego); // Estado inicial es INICIO

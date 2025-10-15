@@ -946,10 +946,10 @@
 	"begin_code.h"
 	"close_code.h"
 
-1760394022 source:v:\universidad\topicos_de_programacion-2025\tp_topicos_2c2025\main.c
+1760485525 source:v:\universidad\topicos_de_programacion-2025\tp_topicos_2c2025\main.c
 	"TP_Topicos.h"
 
-1760392238 v:\universidad\topicos_de_programacion-2025\tp_topicos_2c2025\tp_topicos.h
+1760485078 v:\universidad\topicos_de_programacion-2025\tp_topicos_2c2025\tp_topicos.h
 	<SDL2/SDL.h>
 	<SDL2/SDL_ttf.h>
 	<SDL2/SDL_mixer.h>
@@ -1417,6 +1417,6 @@
 	"begin_code.h"
 	"close_code.h"
 
-1760397022 source:v:\universidad\topicos_de_programacion-2025\tp_topicos_2c2025\tp_topicos.c
+1760486354 source:v:\universidad\topicos_de_programacion-2025\tp_topicos_2c2025\tp_topicos.c
 	"TP_Topicos.h"
 

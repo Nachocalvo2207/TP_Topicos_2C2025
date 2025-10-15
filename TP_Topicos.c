@@ -61,9 +61,9 @@ bool sdl_Iniciar(tJuego *juego)
     char *basePath = SDL_GetBasePath();
     char fullPath[256];
 
-    const char* archivos[4] = {"green.wav","red.wav","yellow.wav","blue.wav"};
+    const char* archivos[8] = {"VERDE.wav","ROJO.wav","AMARILLO.wav","AZUL.wav", "NARANJA.wav", "ROSA.wav", "VIOLETA.wav", "AQUAMARINO.wav"};
 
-    for(int i=0; i<4; i++)
+    for(int i=0; i<7; i++)
     {
         snprintf(fullPath, sizeof(fullPath), "%sSounds/%s", basePath, archivos[i]);
         juego->sonidos[i] = Mix_LoadWAV(fullPath);
@@ -84,6 +84,30 @@ void inicializarConfiguracion(tJuego *juego)
     juego->config.duracion_inicial_ms = DURACION_INICIAL; // Usa la macro del .h
     juego->config.modo = MODO_SCHONBERG;
     strcpy(juego->config.ruta_melodia, "ninguno");
+}
+
+void inicializarColores(tJuego *juego)
+{
+     tColorData colores_iniciales[8] = {
+        // [0] VERDE
+        {70, 230, 39, 31, 102, 17},
+        // [1] ROJO
+        {230, 39, 71, 115, 20, 35},
+        // [2] AMARILLO
+        {237, 222, 17, 166, 156, 15},
+        // [3] AZUL
+        {20, 85, 217, 10, 42, 105},
+        // [4] NARANJA
+        {227, 117, 27, 148, 74, 18},
+        // [5] ROSA
+        {214, 19, 130, 135, 14, 82},
+        // [6] VIOLETA
+        {165, 18, 219, 98, 12, 130},
+        // [7] AQUAMARINO
+        {17, 217, 160, 12, 133, 98}
+    };
+
+    memcpy(juego->lista_colores, colores_iniciales, sizeof(tColorData) * 8);
 }
 
 void reiniciarJuego(tJuego *juego)
@@ -303,7 +327,7 @@ void manejarEventos(tJuego *juego, bool *corriendo)
             {
                 int mouseX = event.button.x;
                 int mouseY = event.button.y;
-                int color_clickeado = detectarBotonClick(mouseX, mouseY);
+                int color_clickeado = detectarBotonClick(mouseX, mouseY, juego->config.num_botones);
 
                 if (color_clickeado == SIN_COLOR)
                 {
@@ -328,8 +352,6 @@ void manejarEventos(tJuego *juego, bool *corriendo)
                         juego->estado_juego = SECUENCIA;
                         juego->paso_actual_jugador = 0;
 
-
-
                     }
                 }
                 else
@@ -353,8 +375,9 @@ void manejarEventos(tJuego *juego, bool *corriendo)
 ///Divido el tablero en 4 partes iguales de distintos colores
 void dibujarTablero(tJuego *juego)
 {
-    SDL_SetRenderDrawColor(juego->renderizar, 0, 0, 0, 255);
-    SDL_RenderClear(juego->renderizar);
+    char Colores[7][15] = {"VERDE", "ROJO", "AMARILLO", "AZUL", "NARANJA", "ROSA", "VIOLETA", "AQUA_VERDE"};
+    SDL_SetRenderDrawColor(juego->renderizar, 0, 0, 0, 255); //Elejimos el color con el que queremos pintar
+    SDL_RenderClear(juego->renderizar); //Pintamos toda la ventana con el color elejido
 
     int cx = PIXELES_HORIZONTALES / 2;
     int cy = PIXELES_VERTICALES / 2;
@@ -362,16 +385,16 @@ void dibujarTablero(tJuego *juego)
                          PIXELES_VERTICALES : PIXELES_HORIZONTALES) / 2 - 10;
     int radioInterior = radioExterior / 2; // agujero central
 
-    int r,g,b;
+    int r, g, b;
 
     // recorremos solo la zona que ocupa el círculo
-    for(int y = cy - radioExterior; y <= cy + radioExterior; y++)
+    for(int y = cy - radioExterior; y <= cy + radioExterior; y++) //Itera verticalmente
     {
-        for(int x = cx - radioExterior; x <= cx + radioExterior; x++)
+        for(int x = cx - radioExterior; x <= cx + radioExterior; x++) //Itera Horizontalmente
         {
-            int dx = x - cx;
-            int dy = y - cy;
-            int dist2 = dx*dx + dy*dy;
+            int dx = x - cx; //Cateto 1
+            int dy = y - cy; //Cateto 2
+            int dist2 = dx * dx + dy * dy; //Ecuacion de distancia del circulo x*x + y*y = r*r
 
             // fuera del círculo de juego saltar
             if(dist2 > radioExterior*radioExterior) continue;
@@ -385,68 +408,23 @@ void dibujarTablero(tJuego *juego)
 
             // calculamos ángulo
             double ang = atan2((double)dy, (double)dx); // [-π, π]
-            if(ang < 0) ang += 2*M_PI; // a [0, 2π)
 
+            if(ang < 0) ang += 2*M_PI; //convertimos los angulos negativos a [0, 2π]
 
-            if(ang >= 0 && ang < M_PI/2)         // 0 a 90° → abajo derecha → Azul
+            double escalaBotones = 2.0 * M_PI / juego->config.num_botones;
+
+            int indice_boton = (int)(ang / escalaBotones);
+
+            if(juego->color_iluminado == indice_boton)
             {
-                if(juego->color_iluminado == AZUL)
-                {
-                    r=0;
-                    g=0;
-                    b=brilloBrillante;
-                }
-                else
-                {
-                    r=0;
-                    g=0;
-                    b=brilloOscuro;
-                }
-            }
-            else if(ang >= M_PI/2 && ang < M_PI)   // 90 a 180° → abajo izquierda → Amarillo
+                r = juego->lista_colores[indice_boton].r_brillante;
+                g = juego->lista_colores[indice_boton].g_brillante;
+                b = juego->lista_colores[indice_boton].b_brillante;
+            }else
             {
-                if(juego->color_iluminado == AMARILLO)
-                {
-                    r=brilloBrillante;
-                    g=brilloBrillante;
-                    b=0;
-                }
-                else
-                {
-                    r=brilloOscuro;
-                    g=brilloOscuro;
-                    b=0;
-                }
-            }
-            else if(ang >= M_PI && ang < 3*M_PI/2)   // 180 a 270° → arriba izquierda → Verde
-            {
-                if(juego->color_iluminado == VERDE)
-                {
-                    r=0;
-                    g=brilloBrillante;
-                    b=0;
-                }
-                else
-                {
-                    r=0;
-                    g=brilloOscuro;
-                    b=0;
-                }
-            }
-            else                                    // 270 a 360° → arriba derecha → Rojo
-            {
-                if(juego->color_iluminado == ROJO)
-                {
-                    r=brilloBrillante;
-                    g=0;
-                    b=0;
-                }
-                else
-                {
-                    r=brilloOscuro;
-                    g=0;
-                    b=0;
-                }
+                r = juego->lista_colores[indice_boton].r_oscuro;
+                g = juego->lista_colores[indice_boton].g_oscuro;
+                b = juego->lista_colores[indice_boton].b_oscuro;
             }
 
             SDL_SetRenderDrawColor(juego->renderizar, r, g, b, 255);
@@ -456,6 +434,8 @@ void dibujarTablero(tJuego *juego)
 
     SDL_RenderPresent(juego->renderizar);
 }
+
+
 
 ///TEXTO CONFIG
 // Dibuja texto alineado a la izquierda (el texto comienza en la coordenada X)
@@ -538,7 +518,8 @@ void dibujar_juego(tJuego *juego)
 
 
 }
-int detectarBotonClick(int x, int y)
+
+int detectarBotonClick(int x, int y, int N)
 {
     int cx = PIXELES_HORIZONTALES / 2;
     int cy = PIXELES_VERTICALES / 2;
@@ -548,30 +529,30 @@ int detectarBotonClick(int x, int y)
 
     int dx = x - cx;
     int dy = y - cy;
-    double dist = sqrt(dx*dx + dy*dy);
+    double dist = sqrt(dx*dx + dy*dy); //Distancia del mouse desde  el centro
 
     if(dist < radioInterior || dist > radioExterior)
         return SIN_COLOR;  // clic fuera de la zona de colores
 
-    // determinar sector usando los ejes
-    bool top = (y < cy);
-    bool left = (x < cx);
+    double ang = atan2(dy, dx); //Calculamos el click respecto al centro del simons
+    if(ang < 0) ang += 2*M_PI; //Si es negativo, le sumammos 2PI para que sea positivo
 
-    if(top && left) return VERDE;
-    if(top && !left) return ROJO;
-    if(!top && left) return AMARILLO;
-    return AZUL;
+    double angulo_boton = 2*M_PI / N; //Lo que cada boton ocupa
+    int indice_boton = (int)(ang / angulo_boton);
+
+    return indice_boton;
 }
 
 /// GENERO UN TONO AL AZAR
 int generar_tono(int limite, int anterior, int indice){
-    int num_tono;
     printf("%d", anterior);
+
+    int num_tono;
 
     if(indice != 1){
         do{
             num_tono = rand() % limite;
-        }while(num_tono == anterior);tmb
+        }while(num_tono == anterior);
     }else{
         num_tono = rand() % limite;
     }
@@ -600,7 +581,9 @@ void agregar_nuevo_color_secuencia(tJuego *juego)
     }
 
     int indice = juego->nivel_actual - 1;
-    juego->secuencia[indice] = generar_tono(juego->config.num_botones, juego->secuencia[indice], juego->nivel_actual);
+    juego->secuencia[indice] = generar_tono(juego->config.num_botones,
+                                            juego->nivel_actual == 1 ? 0 : juego->secuencia[indice - 1],
+                                            juego->nivel_actual );
 }
 
 /// REALIZO LA SECUENCIA DE COLORES
@@ -1008,7 +991,7 @@ int calcularDuracionPorNota(int duracion_inicial_ms, int cantidad_notas)
 
 void limpieza_juego(tJuego *juego, int Estatus_Salida)
 {
-    for(int i=0; i<4; i++)
+    for(int i=0; i<7; i++)
     {
         if(juego->sonidos[i])
         {
