@@ -29,15 +29,16 @@
 #define ERROR_SALIDA 1
 #define ERROR_MELODIA -1
 #define DOBLE_CAPACIDAD 2
-#define OPCIONES 3
+#define OPCIONES 4
 #define DISTANCIA_OPCIONES 70
 #define MAX_SEQ 5
 #define CANT_BOTONES 8
 
 #define TOP_JUGADORES 5
-#define DURACION_INICIAL 1000 ///Esto son MS
+#define DURACION_INICIAL 2000 ///Esto son MS
 #define PAUSA_ENTRE_NOTAS 75
 #define DURACION_FLASH_JUGADOR 75
+#define PALABRA_CHEAT "DISLEXIA"
 
 ///Botones
 #define SIN_COLOR -1
@@ -59,15 +60,18 @@
 #define NIVEL_COMPLETADO 4
 #define MENU_CONFIG 5
 #define PIDIENDO_NOMBRE 6
-
+#define VICTORIA 7 ///MODO MOZART
+#define MODO_DESAFIO 8
 
 ///CARPETAS
 #define ESTADISTICAS "Estadisticas/estadisticas.bin"
 #define RUTA_MOZART "Mozart/Melodia.txt"
+#define RUTA_DESAFIO "Mozart/MelodiaDesafio.txt"
 
 ///MODOS
 #define MODO_SCHONBERG 0
 #define MODO_MOZART 1
+#define MODO_CHEAT 2 ///DISLEXIA
 
 typedef struct {
     int num_botones;           // 3..8
@@ -119,6 +123,7 @@ typedef struct
     int *secuencia;
     size_t capacidad_secuencia; ///Cap. de niveles en memoria
     int estado_juego; ///Para chequear si se encuentra jugando
+    int proximo_estado; ///Para
     char nombre_jugador[64];
     int partidas_jugadas;
     int long_melodia_mozart; ///
@@ -147,7 +152,9 @@ void agregar_nuevo_color_secuencia(tJuego *juego);
 void pedirNombreJugador(tJuego *juego, bool *corriendo);
 void manejarEventos(tJuego *juego,bool *corriendo);
 void mostrarPantallaPresentacion(tJuego *juego);
-int generar_tono(int limite, int anterior, int indice);
+int generar_tono(int limite);
+void mostrarPantallaVictoria(tJuego *juego);
+void guardar_melodia_desafio(tJuego *juego);
 
 ///Configuracion
 void dibujar_texto_izquierda(tJuego* j, const char* t, int x, int y, TTF_Font* f, SDL_Color c);
@@ -155,8 +162,6 @@ void dibujar_texto_centro(tJuego* j, const char* t, int x, int y, TTF_Font* f, S
 void dibujar_texto_derecha(tJuego* j, const char* t, int x, int y, TTF_Font* f, SDL_Color c);
 //void iluminarBoton(tJuego *juego, int color);
 void mostrarMenuConfiguracion(tJuego *juego);
-void mostrarBienHecho(tJuego *juego);
-void mostrarGameOver(tJuego *juego);
 
 int cargarMelodiaDesdeArchivo(const char *ruta, tJuego *juego);
 int calcularDuracionPorNota(int duracion_inicial_ms, int cantidad_notas);

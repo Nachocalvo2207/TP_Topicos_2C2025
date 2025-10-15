@@ -75,16 +75,16 @@ bool sdl_Iniciar(tJuego *juego)
     }
     SDL_free(basePath);
 
-    return false; ///FALSE ES NUESTRO CASO DE EXITO EN ESTE CASO*/
+    return false; ///FALSE ES NUESTRO CASO DE EXITO EN ESTE CASO
 }
 
 
 void inicializarConfiguracion(tJuego *juego)
 {
     juego->config.num_botones = 4;
-    juego->config.duracion_inicial_ms = DURACION_INICIAL; // Usa la macro del .h
+    juego->config.duracion_inicial_ms = DURACION_INICIAL;
     juego->config.modo = MODO_SCHONBERG;
-    strcpy(juego->config.ruta_melodia, "ninguno");
+    strcpy(juego->config.ruta_melodia, RUTA_MOZART);
 }
 
 void inicializarColores(tJuego *juego)
@@ -120,7 +120,7 @@ void reiniciarJuego(tJuego *juego)
     juego->paso_secuencia = 0;
     juego->color_iluminado = SIN_COLOR;
     juego->tiempo_ultimo_cambio = 0;
-    juego->nombre_jugador[0] = '\0';
+    ///juego->nombre_jugador[0] = '\0';
 }
 
 
@@ -235,11 +235,21 @@ void manejarEventos(tJuego *juego, bool *corriendo)
                 switch (event.key.keysym.scancode)
                 {
                 case SDL_SCANCODE_1:
+                    juego->proximo_estado = SECUENCIA; // Después de pedir el nombre, queremos iniciar la secuencia.
                     juego->estado_juego = PIDIENDO_NOMBRE;
+
+                    strcpy(juego->nombre_jugador, "");
                     SDL_StartTextInput();
                     break;
                 case SDL_SCANCODE_2:
                     juego->estado_juego = MENU_CONFIG;
+                    break;
+                case SDL_SCANCODE_3:
+                    juego->proximo_estado = MODO_DESAFIO;
+                    juego->estado_juego = PIDIENDO_NOMBRE;
+
+                    strcpy(juego->nombre_jugador, "");
+                    SDL_StartTextInput();
                     break;
                 case SDL_SCANCODE_ESCAPE:
                     *corriendo = false;
@@ -293,10 +303,37 @@ void manejarEventos(tJuego *juego, bool *corriendo)
                 case SDL_SCANCODE_T:
                     juego->config.modo = (juego->config.modo == MODO_SCHONBERG) ? MODO_MOZART : MODO_SCHONBERG;
                     break;
+                ///CAMBIAR MELODIA
+                case SDL_SCANCODE_S:
+                    if (strcmp(juego->config.ruta_melodia, RUTA_MOZART) == 0)
+                    {
+                        strcpy(juego->config.ruta_melodia, RUTA_DESAFIO);
+                    }
+                    else
+                    {
+                        strcpy(juego->config.ruta_melodia, RUTA_MOZART);
+                    }
+                    printf("Melodia seleccionada: %s\n", juego->config.ruta_melodia);
+                    break;
                 default:
                     break;
                 }
                 break; ///FIN MENU_CONFIG
+
+            case VICTORIA: // <--- Nuevo case para manejar eventos en la pantalla de victoria
+                if (event.type == SDL_KEYDOWN && event.key.keysym.scancode == SDL_SCANCODE_SPACE)
+                {
+                    juego->estado_juego = INICIO; // Volvemos al menú principal
+                }
+                break;
+
+            case MODO_DESAFIO:
+                if (event.type == SDL_KEYDOWN && event.key.keysym.scancode == SDL_SCANCODE_RETURN)
+                {
+                    guardar_melodia_desafio(juego); // Llamamos a la función para escribir el archivo
+                    juego->estado_juego = INICIO; // Volvemos al menú
+                }
+                break;
 
             case FINALIZADO:
                 switch (event.key.keysym.scancode)
@@ -307,6 +344,9 @@ void manejarEventos(tJuego *juego, bool *corriendo)
                     SDL_StartTextInput();
                     break;
 
+                case SDL_SCANCODE_M:
+                    reiniciarJuego(juego); // Reinicia el juego al estado INICIO
+                    break;
                 default:
                     break;
                 }
@@ -323,31 +363,40 @@ void manejarEventos(tJuego *juego, bool *corriendo)
         ///clic del mouse
         case SDL_MOUSEBUTTONDOWN:
         {
+            int mouseX = event.button.x;
+            int mouseY = event.button.y;
+            int color_clickeado = detectarBotonClick(mouseX, mouseY, juego->config.num_botones);
+            int color_correcto; ///PARA EL MODO_CHEAT
+            if (color_clickeado == SIN_COLOR)
+                break;
+            juego->color_iluminado = color_clickeado;
+            if(juego->sonidos[color_clickeado])
+            {
+                Mix_PlayChannel(-1, juego->sonidos[color_clickeado], 0);
+            }
+            dibujarTablero(juego);
+            SDL_Delay(DURACION_FLASH_JUGADOR); // Usando la macro
+            juego->color_iluminado = SIN_COLOR;
+            dibujarTablero(juego);
+
             if (juego->estado_juego == JUGANDO)
             {
-                int mouseX = event.button.x;
-                int mouseY = event.button.y;
-                int color_clickeado = detectarBotonClick(mouseX, mouseY, juego->config.num_botones);
-
-                if (color_clickeado == SIN_COLOR)
+                if(strcmp(juego->nombre_jugador,PALABRA_CHEAT)==0)
                 {
-                    break;
+                    int indice_inverso = juego->nivel_actual - 1 - juego->paso_actual_jugador;
+                    color_correcto = juego->secuencia[indice_inverso];
                 }
-                juego->color_iluminado = color_clickeado;
-                if(juego->sonidos[color_clickeado])
+                else
                 {
-                    Mix_PlayChannel(-1, juego->sonidos[color_clickeado], 0);
+                    color_correcto = juego->secuencia[juego->paso_actual_jugador];
                 }
-                dibujarTablero(juego);
-                SDL_Delay(DURACION_FLASH_JUGADOR); // Usando la macro
-                juego->color_iluminado = SIN_COLOR;
 
-                if (color_clickeado == juego->secuencia[juego->paso_actual_jugador])
+                if (color_clickeado == color_correcto)
                 {
                     juego->paso_actual_jugador++;
                     if (juego->paso_actual_jugador >= juego->nivel_actual)
                     {
-                        if(juego->config.modo == MODO_SCHONBERG) ///MODO SCHONBERG
+                        if(juego->config.modo == MODO_SCHONBERG || strcmp(juego->nombre_jugador, PALABRA_CHEAT) == 0) ///MODO SCHONBERG
                         {
                             SDL_Delay(1000);
                             juego->nivel_actual++;
@@ -362,7 +411,7 @@ void manejarEventos(tJuego *juego, bool *corriendo)
                             {
                                 ///Agregar pantalla de victoria despues
                                 actualizar_TOP(juego);
-                                juego->estado_juego = FINALIZADO;
+                                juego->estado_juego = VICTORIA;
                             }
                             else
                             {
@@ -378,16 +427,34 @@ void manejarEventos(tJuego *juego, bool *corriendo)
                 }
                 else
                 {
-                printf("--> ERROR: Clic incorrecto. Intentando actualizar TOP...\n"); // <-- AGREGA ESTA LÍNEA
+                    printf("--> ERROR: Clic incorrecto. Intentando actualizar TOP...\n"); // <-- AGREGA ESTA LÍNEA
                     actualizar_TOP(juego);
-                printf("--> OK: TOP actualizado. Cambiando a estado FINALIZADO.\n"); // <-- AGREGA ESTA LÍNEA
-
-                    mostrarGameOver(juego);
+                    printf("--> OK: TOP actualizado. Cambiando a estado FINALIZADO.\n"); // <-- AGREGA ESTA LÍNEA
 
                     juego->estado_juego = FINALIZADO;
                     juego->partidas_jugadas++;
                 }
 
+            }
+            else if (juego->estado_juego == MODO_DESAFIO)
+            {
+                ///Aumento memoria si es necesario
+                if (juego->nivel_actual >= juego->capacidad_secuencia)
+                {
+                    size_t nueva_capacidad = juego->capacidad_secuencia * DOBLE_CAPACIDAD;
+                    int *aux = realloc(juego->secuencia, nueva_capacidad * sizeof(int));
+                    if(!aux)
+                    {
+                        fprintf(stderr, "Error: No se pudo ampliar la memoria para la secuencia.\n");
+                        return;
+                    }
+                    juego->secuencia = aux;
+                    juego->capacidad_secuencia = nueva_capacidad;
+                }
+
+                // Guardamos la nota y aumentamos el contador
+                juego->secuencia[juego->nivel_actual] = color_clickeado;
+                juego->nivel_actual++;
             }
             break;
         }
@@ -572,26 +639,11 @@ int detectarBotonClick(int x, int y, int N)
 }
 
 /// GENERO UN TONO AL AZAR
-int generar_tono(int limite, int anterior, int indice)
+
+int generar_tono(int limite)
 {
-
-    int num_tono;
-
-    if(indice != 1)
-    {
-        do
-        {
-            num_tono = rand() % limite;
-        }
-        while(num_tono == anterior);
-    }
-    else
-    {
-        num_tono = rand() % limite;
-    }
-
+    int num_tono = rand() % limite;
     return num_tono;
-
 }
 
 
@@ -616,9 +668,7 @@ void agregar_nuevo_color_secuencia(tJuego *juego)
     }
 
     int indice = juego->nivel_actual - 1;
-    juego->secuencia[indice] = generar_tono(juego->config.num_botones,
-                                            juego->nivel_actual == 1 ? 0 : juego->secuencia[indice - 1],
-                                            juego->nivel_actual );
+    juego->secuencia[indice] = generar_tono(juego->config.num_botones);
 
 }
 
@@ -676,7 +726,6 @@ void actualizarJuego(tJuego *juego)
         if (SDL_GetTicks() > juego->tiempo_ultimo_cambio + 1000)
         {
             juego->nivel_actual++;
-
             agregar_nuevo_color_secuencia(juego);
             juego->estado_juego = SECUENCIA;
             juego->paso_actual_jugador = 0;
@@ -704,7 +753,7 @@ void mostrarPantallaPresentacion(tJuego *juego)
         dest.y = 100;
         SDL_RenderCopy(juego->renderizar, juego->textura_imagen, NULL, &dest);
     }
-    const char *opciones_menu[] = {"1. Jugar", "2. Configuracion", "Esc. Salir"};
+    const char *opciones_menu[] = {"1. Jugar", "2. Configuracion", "3. Crear Desafio", "Esc. Salir"};
     int y_inicial = 250; ///Donde arranco en Y
 
     for (int i = 0; i < OPCIONES; i++)
@@ -729,6 +778,8 @@ void mostrarPantallaPresentacion(tJuego *juego)
 
     SDL_RenderPresent(juego->renderizar);
 }
+
+
 
 
 ///PANTALLA DE CONFIGURACION
@@ -777,9 +828,79 @@ void mostrarMenuConfiguracion(tJuego *juego)
     dibujar_texto_centro(juego, modo_texto, col_valor_x, y_actual, juego->texto_config, color_valor);
     dibujar_texto_derecha(juego, "(Tecla T)", col_guia_x, y_actual, juego->texto_config, color_guia);
     y_actual += y_incremento * 1.5;
+///  TIPO DE MELODÍA
+    dibujar_texto_izquierda(juego, "Melodia Activa:", col_etiqueta_x, y_actual, juego->texto_config, color_opcion);
+
+    // Extraemos solo el nombre del archivo de la ruta completa
+    const char* nombre_archivo = strrchr(juego->config.ruta_melodia, '/');
+    if (nombre_archivo)
+    {
+        nombre_archivo++; // Avanzamos el puntero para omitir el '/'
+    }
+    else
+    {
+        nombre_archivo = juego->config.ruta_melodia; // Si no hay '/', es el nombre base
+    }
+
+    dibujar_texto_centro(juego, nombre_archivo, col_valor_x, y_actual, juego->texto_config, color_valor);
+    dibujar_texto_derecha(juego, "(Tecla S)", col_guia_x, y_actual, juego->texto_config, color_guia);
+    y_actual += y_incremento * 1.5; // Aumentamos el espaciado
 
     ///VOLVER
     dibujar_texto_centro(juego, "Presione 'M' para volver al menu principal", col_valor_x, y_actual, juego->texto_config, color_guia);
+
+    SDL_RenderPresent(juego->renderizar);
+}
+
+
+void guardar_melodia_desafio(tJuego *juego)
+{
+    FILE *archivo_desafio = fopen(RUTA_DESAFIO, "w"); //
+    if (!archivo_desafio)
+    {
+        fprintf(stderr, "Error al crear el archivo de desafio.\n");
+        return;
+    }
+
+    for (int i = 0; i < juego->nivel_actual; i++)
+    {
+        fprintf(archivo_desafio, "%d ", juego->secuencia[i]);
+    }
+
+    fclose(archivo_desafio);
+    printf("Melodia guardada con %d notas en 'MelodiaDesafio.txt'.\n", juego->nivel_actual);
+}
+
+void mostrarPantallaVictoria(tJuego *juego)
+{
+    SDL_RenderClear(juego->renderizar);
+
+    /// Colores y fondo
+    SDL_Color color_titulo = {255, 215, 0, 255};   /// Dorado
+    SDL_Color color_texto = {255, 255, 255, 255}; /// Blanco
+    SDL_Color color_guia = {180, 180, 180, 255};   /// Gris
+    SDL_SetRenderDrawColor(juego->renderizar, 10, 20, 40, 255); /// Azul oscuro
+    SDL_Rect fondo = {0, 0, PIXELES_HORIZONTALES, PIXELES_VERTICALES};
+    SDL_RenderFillRect(juego->renderizar, &fondo);
+
+    int y_actual = PIXELES_VERTICALES * 0.2;
+    char buffer[128];
+
+    // Título de Victoria
+    dibujar_texto_centro(juego, "GANASTE!!", (PIXELES_HORIZONTALES / 2), y_actual, juego->texto_fuente, color_titulo);
+    y_actual += 80;
+
+    // Mensaje de felicitaciones
+    snprintf(buffer, sizeof(buffer), "¡Felicidades %s!", juego->nombre_jugador);
+    dibujar_texto_centro(juego, buffer, (PIXELES_HORIZONTALES / 2), y_actual, juego->texto_config, color_texto);
+    y_actual += 50;
+
+    snprintf(buffer, sizeof(buffer), "Completaste la melodia de MOZART");
+    dibujar_texto_centro(juego, buffer, (PIXELES_HORIZONTALES / 2), y_actual, juego->texto_config, color_texto);
+    y_actual += 150;
+
+    ///FIN
+    dibujar_texto_centro(juego, "Presiona ESPACIO para volver al menu", (PIXELES_HORIZONTALES / 2), y_actual, juego->texto_config, color_guia);
 
     SDL_RenderPresent(juego->renderizar);
 }
@@ -844,40 +965,54 @@ void pedirNombreJugador(tJuego *juego, bool *corriendo)
                 SDL_StopTextInput();
                 return;
             }
-            // CORRECCIÓN
+
             else if(key == SDLK_RETURN)
             {
                 if(strlen(juego->nombre_jugador) == 0)
                     strcpy(juego->nombre_jugador, "VACIO");
 
                 palabra_mayus(juego->nombre_jugador);
-                reiniciarJuego(juego); // Reinicia los contadores
+                SDL_StopTextInput();
 
-                if (juego->config.modo == MODO_MOZART)
+
+                if (juego->proximo_estado == MODO_DESAFIO)
                 {
-                    // Si es Mozart, cargamos la melodía del archivo
-                    int notas_cargadas = cargarMelodiaDesdeArchivo(RUTA_MOZART, juego);
-                    if (notas_cargadas == ERROR_MELODIA)
+                    // Si el jugador había elegido "Crear Desafío"...
+                    juego->estado_juego = MODO_DESAFIO;
+                    juego->nivel_actual = 0; // Preparamos el contador de notas para la creación
+                    printf("--- MODO CREACION ---\nCompon tu melodía y presiona ENTER para guardar.\n");
+                }
+                else // Si no, el jugador eligió "Jugar" (proximo_estado es SECUENCIA)
+                {
+                    // Preparamos las variables para una partida normal
+                    // (NO llamamos a reiniciarJuego() para no borrar el nombre que acabamos de ingresar)
+                    juego->nivel_actual = 1;
+                    juego->paso_actual_jugador = 0;
+                    juego->paso_secuencia = 0;
+
+                    // E iniciamos el modo de juego correspondiente (Mozart o Schonberg/Dislexia)
+                    if (juego->config.modo == MODO_MOZART)
                     {
-                        // Si el archivo no se pudo cargar, volvemos al menú para no crashear
-                        printf("ERROR: No se pudo cargar la melodia de Mozart. Volviendo al inicio.\n");
-                        juego->estado_juego = INICIO;
+                        int notas_cargadas = cargarMelodiaDesdeArchivo(juego->config.ruta_melodia, juego);
+                        if (notas_cargadas == ERROR_MELODIA)
+                        {
+                            printf("ERROR: No se pudo cargar la melodia. Volviendo al inicio.\n");
+                            juego->estado_juego = INICIO;
+                        }
+                        else
+                        {
+                            juego->long_melodia_mozart = notas_cargadas;
+                            juego->estado_juego = SECUENCIA;
+                        }
                     }
-                    else
+                    else // Modo Schonberg o Dislexia
                     {
-                        juego->long_melodia_mozart = notas_cargadas;
+                        agregar_nuevo_color_secuencia(juego);
                         juego->estado_juego = SECUENCIA;
                     }
                 }
-                else // Si no, es Modo Schoenberg
-                {
-                    // Creamos la primera nota aleatoria para Schoenberg
-                    agregar_nuevo_color_secuencia(juego);
-                    juego->estado_juego = SECUENCIA;
-                }
-
-                SDL_StopTextInput();
-                return;
+                // --- FIN DE LA MODIFICACIÓN ---
+                return;;
             }
             else if(key == SDLK_BACKSPACE)
             {
@@ -887,7 +1022,6 @@ void pedirNombreJugador(tJuego *juego, bool *corriendo)
         }
     }
 }
-
 
 void actualizar_TOP(tJuego *juego)
 {
@@ -927,26 +1061,6 @@ void actualizar_TOP(tJuego *juego)
 
 }
 
-void mostrarGameOver(tJuego *juego)
-{
-    SDL_RenderClear(juego->renderizar);
-
-    // Fondo negro
-    SDL_SetRenderDrawColor(juego->renderizar, 0, 0, 0, 255);
-    SDL_Rect fondo = {0, 0, PIXELES_HORIZONTALES, PIXELES_VERTICALES};
-    SDL_RenderFillRect(juego->renderizar, &fondo);
-
-    // Texto principal "GAME OVER"
-    SDL_Color color_rojo = {255, 50, 50, 255};
-    dibujar_texto_centro(juego, "GAME OVER", PIXELES_HORIZONTALES / 2, PIXELES_VERTICALES / 2 - 50,
-                         juego->texto_fuente, color_rojo);
-
-
-    SDL_RenderPresent(juego->renderizar);
-
-    // Pausa breve antes de continuar
-    SDL_Delay(2000); // 1 segundo
-}
 
 void mostrar_estadisticas(tJuego *juego)
 {
@@ -989,9 +1103,9 @@ void mostrar_estadisticas(tJuego *juego)
     }
     ///Parte inferior
     y_actual = PIXELES_VERTICALES * 0.85;
-    dibujar_texto_centro(juego, "SPACE: Jugar de nuevo | ESC: Salir", (PIXELES_HORIZONTALES / 2), y_actual, juego->texto_config, color_guia);
-
+    dibujar_texto_centro(juego, "SPACE: Jugar de nuevo | M: Menu Principal | ESC: Salir", (PIXELES_HORIZONTALES / 2), y_actual, juego->texto_config, color_guia);
     SDL_RenderPresent(juego->renderizar);
+
 
 }/// Cargar melodía desde archivo (modo Mozart)
 int cargarMelodiaDesdeArchivo(const char *ruta, tJuego *juego)
@@ -1053,6 +1167,7 @@ int cargarMelodiaDesdeArchivo(const char *ruta, tJuego *juego)
     fclose(melodia);
     return contador;
 }
+
 
 void cargar_estadisticas(tJuego *juego)
 {
@@ -1120,5 +1235,3 @@ void limpieza_juego(tJuego *juego, int Estatus_Salida)
     SDL_Quit();
     exit(Estatus_Salida);
 }
-
-
