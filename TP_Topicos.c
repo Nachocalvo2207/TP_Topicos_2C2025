@@ -75,7 +75,7 @@ bool sdl_Iniciar(tJuego *juego)
     }
     SDL_free(basePath);
 
-    return false; ///FALSE ES NUESTRO CASO DE EXITO EN ESTE CASO
+    return false; ///FALSE ES NUESTRO CASO DE EXITO EN ESTE CASO*/
 }
 
 
@@ -378,9 +378,11 @@ void manejarEventos(tJuego *juego, bool *corriendo)
                 }
                 else
                 {
-    printf("--> ERROR: Clic incorrecto. Intentando actualizar TOP...\n"); // <-- AGREGA ESTA LÍNEA
+                printf("--> ERROR: Clic incorrecto. Intentando actualizar TOP...\n"); // <-- AGREGA ESTA LÍNEA
                     actualizar_TOP(juego);
                 printf("--> OK: TOP actualizado. Cambiando a estado FINALIZADO.\n"); // <-- AGREGA ESTA LÍNEA
+
+                    mostrarGameOver(juego);
 
                     juego->estado_juego = FINALIZADO;
                     juego->partidas_jugadas++;
@@ -674,6 +676,7 @@ void actualizarJuego(tJuego *juego)
         if (SDL_GetTicks() > juego->tiempo_ultimo_cambio + 1000)
         {
             juego->nivel_actual++;
+
             agregar_nuevo_color_secuencia(juego);
             juego->estado_juego = SECUENCIA;
             juego->paso_actual_jugador = 0;
@@ -726,8 +729,6 @@ void mostrarPantallaPresentacion(tJuego *juego)
 
     SDL_RenderPresent(juego->renderizar);
 }
-
-
 
 
 ///PANTALLA DE CONFIGURACION
@@ -887,6 +888,7 @@ void pedirNombreJugador(tJuego *juego, bool *corriendo)
     }
 }
 
+
 void actualizar_TOP(tJuego *juego)
 {
     int nivel_logrado = juego->nivel_actual - 1; ///
@@ -925,6 +927,26 @@ void actualizar_TOP(tJuego *juego)
 
 }
 
+void mostrarGameOver(tJuego *juego)
+{
+    SDL_RenderClear(juego->renderizar);
+
+    // Fondo negro
+    SDL_SetRenderDrawColor(juego->renderizar, 0, 0, 0, 255);
+    SDL_Rect fondo = {0, 0, PIXELES_HORIZONTALES, PIXELES_VERTICALES};
+    SDL_RenderFillRect(juego->renderizar, &fondo);
+
+    // Texto principal "GAME OVER"
+    SDL_Color color_rojo = {255, 50, 50, 255};
+    dibujar_texto_centro(juego, "GAME OVER", PIXELES_HORIZONTALES / 2, PIXELES_VERTICALES / 2 - 50,
+                         juego->texto_fuente, color_rojo);
+
+
+    SDL_RenderPresent(juego->renderizar);
+
+    // Pausa breve antes de continuar
+    SDL_Delay(2000); // 1 segundo
+}
 
 void mostrar_estadisticas(tJuego *juego)
 {
@@ -1032,7 +1054,6 @@ int cargarMelodiaDesdeArchivo(const char *ruta, tJuego *juego)
     return contador;
 }
 
-
 void cargar_estadisticas(tJuego *juego)
 {
     FILE *estadisticas = fopen(ESTADISTICAS,"rb");
@@ -1099,3 +1120,5 @@ void limpieza_juego(tJuego *juego, int Estatus_Salida)
     SDL_Quit();
     exit(Estatus_Salida);
 }
+
+
