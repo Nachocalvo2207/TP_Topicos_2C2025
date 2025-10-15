@@ -61,17 +61,10 @@ bool sdl_Iniciar(tJuego *juego)
     char *basePath = SDL_GetBasePath();
     char fullPath[256];
 
-<<<<<<< HEAD
-    const char* archivos[8] = {"VERDE.wav","ROJO.wav","AMARILLO.wav","AZUL.wav", "NARANJA.wav", "ROSA.wav", "VIOLETA.wav", "AQUAMARINO.wav"};
+    const char* archivos[CANT_BOTONES] = {"VERDE.wav","ROJO.wav","AMARILLO.wav","AZUL.wav", "NARANJA.wav", "ROSA.wav", "VIOLETA.wav", "AQUAMARINO.wav"};
 
     for(int i=0; i<7; i++)
-=======
-    const char* archivos[CANT_BOTONES] = {"sound_0.wav","sound_1.wav","sound_2.wav","sound_3.wav"
-                              ,"sound_4.wav","sound_5.wav","sound_6.wav","sound_7.wav"
-                            };
 
-    for(int i=0; i<CANT_BOTONES; i++)
->>>>>>> origin/main
     {
         snprintf(fullPath, sizeof(fullPath), "%sSounds/%s", basePath, archivos[i]);
         juego->sonidos[i] = Mix_LoadWAV(fullPath);
@@ -96,7 +89,8 @@ void inicializarConfiguracion(tJuego *juego)
 
 void inicializarColores(tJuego *juego)
 {
-     tColorData colores_iniciales[8] = {
+    tColorData colores_iniciales[8] =
+    {
         // [0] VERDE
         {70, 230, 39, 31, 102, 17},
         // [1] ROJO
@@ -210,7 +204,6 @@ bool crearTexto(tJuego *juego)
 
     return false;
 }
-
 
 
 
@@ -354,13 +347,6 @@ void manejarEventos(tJuego *juego, bool *corriendo)
                     juego->paso_actual_jugador++;
                     if (juego->paso_actual_jugador >= juego->nivel_actual)
                     {
-<<<<<<< HEAD
-                        juego->nivel_actual++;
-                        agregar_nuevo_color_secuencia(juego);
-                        juego->estado_juego = SECUENCIA;
-                        juego->paso_actual_jugador = 0;
-
-=======
                         if(juego->config.modo == MODO_SCHONBERG) ///MODO SCHONBERG
                         {
                             SDL_Delay(1000);
@@ -388,9 +374,9 @@ void manejarEventos(tJuego *juego, bool *corriendo)
                             }
 
                         }
->>>>>>> origin/main
                     }
-                }else
+                }
+                else
                 {
                     actualizar_TOP(juego);
                     juego->estado_juego = FINALIZADO;
@@ -405,13 +391,12 @@ void manejarEventos(tJuego *juego, bool *corriendo)
     } // Fin del while(SDL_PollEvent)
 }
 
-
 // ----- SIMON -----
 
 ///Divido el tablero en 4 partes iguales de distintos colores
 void dibujarTablero(tJuego *juego)
 {
-    char Colores[7][15] = {"VERDE", "ROJO", "AMARILLO", "AZUL", "NARANJA", "ROSA", "VIOLETA", "AQUA_VERDE"};
+    ///char Colores[7][15] = {"VERDE", "ROJO", "AMARILLO", "AZUL", "NARANJA", "ROSA", "VIOLETA", "AQUA_VERDE"};
     SDL_SetRenderDrawColor(juego->renderizar, 0, 0, 0, 255); //Elejimos el color con el que queremos pintar
     SDL_RenderClear(juego->renderizar); //Pintamos toda la ventana con el color elejido
 
@@ -456,7 +441,8 @@ void dibujarTablero(tJuego *juego)
                 r = juego->lista_colores[indice_boton].r_brillante;
                 g = juego->lista_colores[indice_boton].g_brillante;
                 b = juego->lista_colores[indice_boton].b_brillante;
-            }else
+            }
+            else
             {
                 r = juego->lista_colores[indice_boton].r_oscuro;
                 g = juego->lista_colores[indice_boton].g_oscuro;
@@ -580,25 +566,26 @@ int detectarBotonClick(int x, int y, int N)
 }
 
 /// GENERO UN TONO AL AZAR
-<<<<<<< HEAD
-int generar_tono(int limite, int anterior, int indice){
-    printf("%d", anterior);
+int generar_tono(int limite, int anterior, int indice)
+{
 
     int num_tono;
 
-    if(indice != 1){
-        do{
+    if(indice != 1)
+    {
+        do
+        {
             num_tono = rand() % limite;
-        }while(num_tono == anterior);
-    }else{
+        }
+        while(num_tono == anterior);
+    }
+    else
+    {
         num_tono = rand() % limite;
     }
 
     return num_tono;
-=======
-int generar_tono(int limite){
-    return rand() % limite;
->>>>>>> origin/main
+
 }
 
 
@@ -623,13 +610,10 @@ void agregar_nuevo_color_secuencia(tJuego *juego)
     }
 
     int indice = juego->nivel_actual - 1;
-<<<<<<< HEAD
     juego->secuencia[indice] = generar_tono(juego->config.num_botones,
                                             juego->nivel_actual == 1 ? 0 : juego->secuencia[indice - 1],
                                             juego->nivel_actual );
-=======
-    juego->secuencia[indice] = generar_tono(juego->config.num_botones);
->>>>>>> origin/main
+
 }
 
 
@@ -855,15 +839,38 @@ void pedirNombreJugador(tJuego *juego, bool *corriendo)
                 SDL_StopTextInput();
                 return;
             }
+            // CORRECCIÓN
             else if(key == SDLK_RETURN)
             {
                 if(strlen(juego->nombre_jugador) == 0)
                     strcpy(juego->nombre_jugador, "VACIO");
-                // cuando confirma, arrancamos el juego
+
                 palabra_mayus(juego->nombre_jugador);
-                reiniciarJuego(juego);
-                agregar_nuevo_color_secuencia(juego);
-                juego->estado_juego = SECUENCIA;
+                reiniciarJuego(juego); // Reinicia los contadores
+
+                if (juego->config.modo == MODO_MOZART)
+                {
+                    // Si es Mozart, cargamos la melodía del archivo
+                    int notas_cargadas = cargarMelodiaDesdeArchivo(RUTA_MOZART, juego);
+                    if (notas_cargadas == ERROR_MELODIA)
+                    {
+                        // Si el archivo no se pudo cargar, volvemos al menú para no crashear
+                        printf("ERROR: No se pudo cargar la melodia de Mozart. Volviendo al inicio.\n");
+                        juego->estado_juego = INICIO;
+                    }
+                    else
+                    {
+                        juego->long_melodia_mozart = notas_cargadas;
+                        juego->estado_juego = SECUENCIA;
+                    }
+                }
+                else // Si no, es Modo Schoenberg
+                {
+                    // Creamos la primera nota aleatoria para Schoenberg
+                    agregar_nuevo_color_secuencia(juego);
+                    juego->estado_juego = SECUENCIA;
+                }
+
                 SDL_StopTextInput();
                 return;
             }

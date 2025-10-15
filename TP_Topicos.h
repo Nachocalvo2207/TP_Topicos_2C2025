@@ -106,15 +106,11 @@ typedef struct
     SDL_Rect rect_btn_config;
     SDL_Rect rect_btn_salir;
     Uint32 tiempo_ultimo_cambio;
-<<<<<<< HEAD
-    Mix_Chunk *sonidos[8];
-=======
     Uint32 tiempo_encendido;
     Uint32 tiempo_flash_jugador;
     Mix_Chunk *sonidos[CANT_BOTONES];
->>>>>>> origin/main
     tConfig config;
-    tColorData lista_colores[8];
+    tColorData lista_colores[CANT_BOTONES];
     int nivel_actual; ///Nivel al que llego el jugador
     int nivel_maximo; ///Maximo nivel alcanzado (Estadisticas)
     int paso_actual_jugador; /// Cuando esta realizando la secuencia
@@ -151,7 +147,7 @@ void agregar_nuevo_color_secuencia(tJuego *juego);
 void pedirNombreJugador(tJuego *juego, bool *corriendo);
 void manejarEventos(tJuego *juego,bool *corriendo);
 void mostrarPantallaPresentacion(tJuego *juego);
-int generar_tono(int limite);
+int generar_tono(int limite, int anterior, int indice);
 
 ///Configuracion
 void dibujar_texto_izquierda(tJuego* j, const char* t, int x, int y, TTF_Font* f, SDL_Color c);
