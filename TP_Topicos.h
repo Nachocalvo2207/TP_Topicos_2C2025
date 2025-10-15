@@ -155,6 +155,8 @@ void dibujar_texto_centro(tJuego* j, const char* t, int x, int y, TTF_Font* f, S
 void dibujar_texto_derecha(tJuego* j, const char* t, int x, int y, TTF_Font* f, SDL_Color c);
 //void iluminarBoton(tJuego *juego, int color);
 void mostrarMenuConfiguracion(tJuego *juego);
+void mostrarBienHecho(tJuego *juego);
+void mostrarGameOver(tJuego *juego);
 
 int cargarMelodiaDesdeArchivo(const char *ruta, tJuego *juego);
 int calcularDuracionPorNota(int duracion_inicial_ms, int cantidad_notas);
