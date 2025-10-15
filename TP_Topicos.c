@@ -57,13 +57,21 @@ bool sdl_Iniciar(tJuego *juego)
 
 
 
-    //Carga de sonidos
+    ///Carga de sonidos
     char *basePath = SDL_GetBasePath();
     char fullPath[256];
 
+<<<<<<< HEAD
     const char* archivos[8] = {"VERDE.wav","ROJO.wav","AMARILLO.wav","AZUL.wav", "NARANJA.wav", "ROSA.wav", "VIOLETA.wav", "AQUAMARINO.wav"};
 
     for(int i=0; i<7; i++)
+=======
+    const char* archivos[CANT_BOTONES] = {"sound_0.wav","sound_1.wav","sound_2.wav","sound_3.wav"
+                              ,"sound_4.wav","sound_5.wav","sound_6.wav","sound_7.wav"
+                            };
+
+    for(int i=0; i<CANT_BOTONES; i++)
+>>>>>>> origin/main
     {
         snprintf(fullPath, sizeof(fullPath), "%sSounds/%s", basePath, archivos[i]);
         juego->sonidos[i] = Mix_LoadWAV(fullPath);
@@ -112,19 +120,18 @@ void inicializarColores(tJuego *juego)
 
 void reiniciarJuego(tJuego *juego)
 {
-    // Esta función AHORA solo resetea los valores de una partida
     juego->estado_juego = INICIO;
     juego->nivel_actual = 1;
     juego->paso_actual_jugador = 0;
     juego->paso_secuencia = 0;
     juego->color_iluminado = SIN_COLOR;
     juego->tiempo_ultimo_cambio = 0;
+    juego->nombre_jugador[0] = '\0';
 }
 
 
 void palabra_mayus(char *palabra)
 {
-    // Mientras no lleguemos al final de la cadena (el carácter '\0')
     while (*palabra)
     {
         *palabra = toupper((unsigned char)*palabra);
@@ -211,7 +218,7 @@ void manejarEventos(tJuego *juego, bool *corriendo)
 {
     SDL_Event event;
 
-    // Procesa todos los eventos pendientes en la cola
+    /// Procesa todos los eventos pendientes en la cola
     while (SDL_PollEvent(&event))
     {
         switch (event.type)
@@ -347,14 +354,43 @@ void manejarEventos(tJuego *juego, bool *corriendo)
                     juego->paso_actual_jugador++;
                     if (juego->paso_actual_jugador >= juego->nivel_actual)
                     {
+<<<<<<< HEAD
                         juego->nivel_actual++;
                         agregar_nuevo_color_secuencia(juego);
                         juego->estado_juego = SECUENCIA;
                         juego->paso_actual_jugador = 0;
 
+=======
+                        if(juego->config.modo == MODO_SCHONBERG) ///MODO SCHONBERG
+                        {
+                            SDL_Delay(1000);
+                            juego->nivel_actual++;
+                            agregar_nuevo_color_secuencia(juego);
+                            juego->estado_juego = SECUENCIA;
+                            juego->paso_actual_jugador = 0;
+                            juego->tiempo_ultimo_cambio = SDL_GetTicks();
+                        }
+                        else  ///MODO MOZART
+                        {
+                            if(juego->nivel_actual >= juego->long_melodia_mozart) ///Gano el juego
+                            {
+                                ///Agregar pantalla de victoria despues
+                                actualizar_TOP(juego);
+                                juego->estado_juego = FINALIZADO;
+                            }
+                            else
+                            {
+                                SDL_Delay(1000);
+                                juego->nivel_actual++;
+                                juego->estado_juego = SECUENCIA;
+                                juego->paso_actual_jugador = 0;
+                                juego->tiempo_ultimo_cambio = SDL_GetTicks();
+                            }
+
+                        }
+>>>>>>> origin/main
                     }
-                }
-                else
+                }else
                 {
                     actualizar_TOP(juego);
                     juego->estado_juego = FINALIZADO;
@@ -544,6 +580,7 @@ int detectarBotonClick(int x, int y, int N)
 }
 
 /// GENERO UN TONO AL AZAR
+<<<<<<< HEAD
 int generar_tono(int limite, int anterior, int indice){
     printf("%d", anterior);
 
@@ -558,7 +595,12 @@ int generar_tono(int limite, int anterior, int indice){
     }
 
     return num_tono;
+=======
+int generar_tono(int limite){
+    return rand() % limite;
+>>>>>>> origin/main
 }
+
 
 void agregar_nuevo_color_secuencia(tJuego *juego)
 {
@@ -581,10 +623,15 @@ void agregar_nuevo_color_secuencia(tJuego *juego)
     }
 
     int indice = juego->nivel_actual - 1;
+<<<<<<< HEAD
     juego->secuencia[indice] = generar_tono(juego->config.num_botones,
                                             juego->nivel_actual == 1 ? 0 : juego->secuencia[indice - 1],
                                             juego->nivel_actual );
+=======
+    juego->secuencia[indice] = generar_tono(juego->config.num_botones);
+>>>>>>> origin/main
 }
+
 
 /// REALIZO LA SECUENCIA DE COLORES
 void actualizarJuego(tJuego *juego)
@@ -752,6 +799,7 @@ void mostrarMenuConfiguracion(tJuego *juego)
 // --- Pedir nombre del jugador (interacción simple por teclado)
 void pedirNombreJugador(tJuego *juego, bool *corriendo)
 {
+    SDL_StartTextInput();
     SDL_RenderClear(juego->renderizar);
 
     const char *comentario = "Ingrese su nombre y presione ENTER";
@@ -911,35 +959,66 @@ void mostrar_estadisticas(tJuego *juego)
     dibujar_texto_centro(juego, "SPACE: Jugar de nuevo | ESC: Salir", (PIXELES_HORIZONTALES / 2), y_actual, juego->texto_config, color_guia);
 
     SDL_RenderPresent(juego->renderizar);
-}// --- Cargar melodía desde archivo (modo Mozart)
-// Formato simple: lista de enteros 0..(num_botones-1) separados por espacios o nuevas lineas.
-// Devuelve cantidad de notas cargadas, o -1 en error
+
+}/// Cargar melodía desde archivo (modo Mozart)
 int cargarMelodiaDesdeArchivo(const char *ruta, tJuego *juego)
 {
-    FILE *f = fopen(ruta, "r");
-    if(!f) return -1;
-    int count = 0;
-    while(!feof(f) && count < MAX_SEQ)
+    FILE *melodia = fopen(ruta, "r");
+    if (!melodia)
     {
-        int v;
-        if(fscanf(f, "%d", &v) == 1)
+        fprintf(stderr, "Error: No se pudo abrir el archivo de melodia '%s'\n", ruta);
+        return ERROR_MELODIA;
+    }
+
+    /// Liberamos memoria
+    if (juego->secuencia != NULL)
+    {
+        free(juego->secuencia);
+    }
+
+    // Empezamos con una capacidad inicial para la nueva melodía.
+    juego->capacidad_secuencia = MAX_SEQ;
+    juego->secuencia = malloc(juego->capacidad_secuencia * sizeof(int));
+    if (!juego->secuencia)
+    {
+        fprintf(stderr, "Error: No se pudo reservar memoria inicial para la melodia.\n");
+        fclose(melodia);
+        return ERROR_MELODIA;
+    }
+
+    int contador = 0;
+    int nota;
+
+    while (fscanf(melodia, "%d", &nota) == 1)
+    {
+        ///Chequeo espacio
+        if (contador >= juego->capacidad_secuencia)
         {
-            if(v >= 0 && v < juego->config.num_botones)
+            size_t nueva_capacidad = juego->capacidad_secuencia * DOBLE_CAPACIDAD;
+            int* temp = realloc(juego->secuencia, nueva_capacidad * sizeof(int));
+
+            if (!temp)
             {
-                juego->secuencia[count++] = v;
+                fprintf(stderr, "Error al ampliar memoria para la melodia.\n");
+                fclose(melodia);
+                return contador;
             }
-            else
-            {
-                // si el archivo tiene valores fuera de rango, se ignora
-            }
+
+            juego->secuencia = temp;
+            juego->capacidad_secuencia = nueva_capacidad;
+            printf("DEBUG: Memoria de la melodia ampliada a %zu notas.\n", nueva_capacidad);
         }
-        else
+
+
+        if (nota >= 0 && nota < juego->config.num_botones)
         {
-            break;
+            juego->secuencia[contador] = nota;
+            contador++;
         }
     }
-    fclose(f);
-    return count;
+
+    fclose(melodia);
+    return contador;
 }
 
 

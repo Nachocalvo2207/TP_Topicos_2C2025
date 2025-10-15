@@ -1,5 +1,5 @@
 # depslib dependency file v1.0
-1760323951 source:c:\users\o014851\desktop\nacho\unlam\tp_topicos\main.c
+1760410668 source:c:\users\o014851\desktop\nacho\unlam\tp_topicos\main.c
 	"TP_Topicos.h"
 
 1748917206 c:\users\o014851\desktop\nacho\unlam\tp_topicos\lib\sdl2-2.32.8\x86_64-w64-mingw32\include\sdl2\sdl.h
@@ -444,10 +444,10 @@
 	"begin_code.h"
 	"close_code.h"
 
-1760326978 source:c:\users\o014851\desktop\nacho\unlam\tp_topicos\tp_topicos.c
+1760417515 source:c:\users\o014851\desktop\nacho\unlam\tp_topicos\tp_topicos.c
 	"TP_Topicos.h"
 
-1760326580 c:\users\o014851\desktop\nacho\unlam\tp_topicos\tp_topicos.h
+1760416003 c:\users\o014851\desktop\nacho\unlam\tp_topicos\tp_topicos.h
 	<SDL2/SDL.h>
 	<SDL2/SDL_ttf.h>
 	<SDL2/SDL_mixer.h>
@@ -946,6 +946,7 @@
 	"begin_code.h"
 	"close_code.h"
 
+<<<<<<< HEAD
 1760485525 source:v:\universidad\topicos_de_programacion-2025\tp_topicos_2c2025\main.c
 	"TP_Topicos.h"
 
@@ -1420,3 +1421,5 @@
 1760486354 source:v:\universidad\topicos_de_programacion-2025\tp_topicos_2c2025\tp_topicos.c
 	"TP_Topicos.h"
 
+=======
+>>>>>>> origin/main

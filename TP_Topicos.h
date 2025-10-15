@@ -27,13 +27,16 @@
 ///MACROS
 #define OK_SALIDA 0
 #define ERROR_SALIDA 1
+#define ERROR_MELODIA -1
 #define DOBLE_CAPACIDAD 2
 #define OPCIONES 3
 #define DISTANCIA_OPCIONES 70
 #define MAX_SEQ 5
+#define CANT_BOTONES 8
+
 #define TOP_JUGADORES 5
-#define DURACION_INICIAL 2000 ///Esto son MS
-#define PAUSA_ENTRE_NOTAS 150
+#define DURACION_INICIAL 1000 ///Esto son MS
+#define PAUSA_ENTRE_NOTAS 75
 #define DURACION_FLASH_JUGADOR 75
 
 ///Botones
@@ -60,6 +63,7 @@
 
 ///CARPETAS
 #define ESTADISTICAS "Estadisticas/estadisticas.bin"
+#define RUTA_MOZART "Mozart/Melodia.txt"
 
 ///MODOS
 #define MODO_SCHONBERG 0
@@ -102,7 +106,13 @@ typedef struct
     SDL_Rect rect_btn_config;
     SDL_Rect rect_btn_salir;
     Uint32 tiempo_ultimo_cambio;
+<<<<<<< HEAD
     Mix_Chunk *sonidos[8];
+=======
+    Uint32 tiempo_encendido;
+    Uint32 tiempo_flash_jugador;
+    Mix_Chunk *sonidos[CANT_BOTONES];
+>>>>>>> origin/main
     tConfig config;
     tColorData lista_colores[8];
     int nivel_actual; ///Nivel al que llego el jugador
@@ -115,6 +125,7 @@ typedef struct
     int estado_juego; ///Para chequear si se encuentra jugando
     char nombre_jugador[64];
     int partidas_jugadas;
+    int long_melodia_mozart; ///
     tEstadistica top_jugadores[TOP_JUGADORES]; ///POR EL MOMENTO TOP 5
     int cant_top_jugadores;
 } tJuego;
@@ -126,7 +137,7 @@ void limpieza_juego(tJuego *juego, int Estatus_Salida);
 bool crearTexto(tJuego *juego);
 void actualizarJuego(tJuego *juego);
 void palabra_mayus(char *palabra);
-int generar_tono(int limite, int anterior, int indice);
+
 
 ///Funciones del Simon
 void inicializarConfiguracion(tJuego *juego);
@@ -140,6 +151,7 @@ void agregar_nuevo_color_secuencia(tJuego *juego);
 void pedirNombreJugador(tJuego *juego, bool *corriendo);
 void manejarEventos(tJuego *juego,bool *corriendo);
 void mostrarPantallaPresentacion(tJuego *juego);
+int generar_tono(int limite);
 
 ///Configuracion
 void dibujar_texto_izquierda(tJuego* j, const char* t, int x, int y, TTF_Font* f, SDL_Color c);
