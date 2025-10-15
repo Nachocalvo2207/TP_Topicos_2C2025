@@ -1,5 +1,5 @@
 # depslib dependency file v1.0
-1760410668 source:c:\users\o014851\desktop\nacho\unlam\tp_topicos\main.c
+1760497962 source:c:\users\o014851\desktop\nacho\unlam\tp_topicos\main.c
 	"TP_Topicos.h"
 
 1748917206 c:\users\o014851\desktop\nacho\unlam\tp_topicos\lib\sdl2-2.32.8\x86_64-w64-mingw32\include\sdl2\sdl.h
@@ -444,10 +444,10 @@
 	"begin_code.h"
 	"close_code.h"
 
-1760417515 source:c:\users\o014851\desktop\nacho\unlam\tp_topicos\tp_topicos.c
+1760498116 source:c:\users\o014851\desktop\nacho\unlam\tp_topicos\tp_topicos.c
 	"TP_Topicos.h"
 
-1760416003 c:\users\o014851\desktop\nacho\unlam\tp_topicos\tp_topicos.h
+1760496775 c:\users\o014851\desktop\nacho\unlam\tp_topicos\tp_topicos.h
 	<SDL2/SDL.h>
 	<SDL2/SDL_ttf.h>
 	<SDL2/SDL_mixer.h>
@@ -467,7 +467,7 @@
 1760487453 source:c:\users\o014851\desktop\nacho\unlam\tp_topicos\tp_topicos_2c2025\main.c
 	"TP_Topicos.h"
 
-1760494270 c:\users\o014851\desktop\nacho\unlam\tp_topicos\tp_topicos_2c2025\tp_topicos.h
+1760496775 c:\users\o014851\desktop\nacho\unlam\tp_topicos\tp_topicos_2c2025\tp_topicos.h
 	<SDL2/SDL.h>
 	<SDL2/SDL_ttf.h>
 	<SDL2/SDL_mixer.h>
@@ -935,7 +935,7 @@
 	"begin_code.h"
 	"close_code.h"
 
-1760494870 source:c:\users\o014851\desktop\nacho\unlam\tp_topicos\tp_topicos_2c2025\tp_topicos.c
+1760496966 source:c:\users\o014851\desktop\nacho\unlam\tp_topicos\tp_topicos_2c2025\tp_topicos.c
 	"TP_Topicos.h"
 
 1738973080 c:\users\o014851\desktop\nacho\unlam\tp_topicos\lib\sdl2_mixer-2.8.1\x86_64-w64-mingw32\include\sdl2\sdl_mixer.h

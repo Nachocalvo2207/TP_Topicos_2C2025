@@ -18,10 +18,12 @@ int main(int argc, char* argv[])
     bool corriendo = true;
     srand(time(NULL));
 
-    if (sdl_Iniciar(&juego)) {
+    if (sdl_Iniciar(&juego))
+    {
         limpieza_juego(&juego, ERROR_SALIDA);
     }
-    if (crearTexto(&juego)) {
+    if (crearTexto(&juego))
+    {
         limpieza_juego(&juego, ERROR_SALIDA);
     }
     inicializarConfiguracion(&juego);
@@ -42,22 +44,23 @@ int main(int argc, char* argv[])
         // 3. Decidimos QUÉ dibujar basado en el estado actual
         switch (juego.estado_juego)
         {
-            case INICIO:
-                mostrarPantallaPresentacion(&juego);
-                break;
-            case MENU_CONFIG:
-                mostrarMenuConfiguracion(&juego);
-                break;
-            case PIDIENDO_NOMBRE:
-                pedirNombreJugador(&juego, &corriendo);
-                break;
-            case SECUENCIA:
-            case JUGANDO:
-                dibujar_juego(&juego); // Esta función dibuja el tablero
-                break;
-            case FINALIZADO:
-                mostrar_estadisticas(&juego);
-                break;
+        case INICIO:
+            mostrarPantallaPresentacion(&juego);
+            break;
+        case MENU_CONFIG:
+            mostrarMenuConfiguracion(&juego);
+            break;
+        case PIDIENDO_NOMBRE:
+            pedirNombreJugador(&juego, &corriendo);
+            break;
+        case SECUENCIA:
+        case JUGANDO:
+            dibujar_juego(&juego); // Esta función dibuja el tablero
+            break;
+        case FINALIZADO:
+            fflush(stdout);
+            mostrar_estadisticas(&juego);
+            break;
         }
     }
 

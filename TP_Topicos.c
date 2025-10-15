@@ -378,7 +378,10 @@ void manejarEventos(tJuego *juego, bool *corriendo)
                 }
                 else
                 {
+    printf("--> ERROR: Clic incorrecto. Intentando actualizar TOP...\n"); // <-- AGREGA ESTA LÍNEA
                     actualizar_TOP(juego);
+                printf("--> OK: TOP actualizado. Cambiando a estado FINALIZADO.\n"); // <-- AGREGA ESTA LÍNEA
+
                     juego->estado_juego = FINALIZADO;
                     juego->partidas_jugadas++;
                 }
@@ -464,7 +467,8 @@ void dibujarTablero(tJuego *juego)
 void dibujar_texto_izquierda(tJuego* juego, const char* t, int x, int y, TTF_Font* f, SDL_Color c)
 {
     SDL_Surface* superficie = TTF_RenderUTF8_Blended(f, t, c);
-    if (!juego) return;
+    if (!superficie)
+        return;
     SDL_Texture* textura = SDL_CreateTextureFromSurface(juego->renderizar, superficie);
     SDL_Rect r = {x, y, superficie->w, superficie->h};
     SDL_RenderCopy(juego->renderizar, textura, NULL, &r);
