@@ -8,8 +8,8 @@
 /// DNI: 43569575
 /// Entrega: Si
 
-/// Apellido, nombre: Calvo, Ignacio
-/// DNI: 41162300
+/// Apellido, nombre: Cardoso, Christopfer
+/// DNI: 38511608
 /// Entrega: Si
 
 int main(int argc, char* argv[])
