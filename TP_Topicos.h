@@ -19,7 +19,7 @@
 ///FUENTE (DINAMICA SEGUN TAMANIO)
 #define TEXT_SIZE (PIXELES_VERTICALES / 15)
 #define TEXT_CONFIG_SIZE (PIXELES_VERTICALES / 25)
-
+#define TEXT_AYUDA_SIZE (PIXELES_VERTICALES / 35)
 ///COLORES
 #define brilloOscuro 150
 #define brilloBrillante 255
@@ -29,10 +29,12 @@
 #define ERROR_SALIDA 1
 #define ERROR_MELODIA -1
 #define DOBLE_CAPACIDAD 2
-#define OPCIONES 4
+#define OPCIONES 5
 #define DISTANCIA_OPCIONES 70
 #define MAX_SEQ 5
 #define CANT_BOTONES 8
+#define ERROR_MOZART 9
+#define AYUDA 10
 
 #define TOP_JUGADORES 5
 #define DURACION_INICIAL 2000 ///Esto son MS
@@ -51,6 +53,16 @@
 #define VIOLETA 6
 #define AQUAMARINO 7
 
+///SONIDOS
+#define SND_AMARILLO "snd/AMARILLO.wav"
+#define SND_AQUAMARINO "snd/AQUAMARINO.wav"
+#define SND_AZUL "snd/AZUL.wav"
+#define SND_NARANJA "snd/NARANJA.wav"
+#define SND_ROJO "snd/ROJO.wav"
+#define SND_ROSA "snd/ROSA.wav"
+#define SND_VERDE "snd/VERDE.wav"
+#define SND_VIOLETA "snd/VIOLETA.wav"
+
 
 ///ESTADOS
 #define INICIO 0
@@ -64,16 +76,18 @@
 #define MODO_DESAFIO 8
 
 ///CARPETAS
-#define ESTADISTICAS "Estadisticas/estadisticas.bin"
-#define RUTA_MOZART "Mozart/Melodia.txt"
-#define RUTA_DESAFIO "Mozart/MelodiaDesafio.txt"
+#define ESTADISTICAS "estadisticas.bin"
+#define RUTA_MOZART "Melodia.txt"
+#define RUTA_DESAFIO "MelodiaDesafio.txt"
+#define RUTA_FUENTE "fnt/freesansbold.ttf"
 
 ///MODOS
 #define MODO_SCHONBERG 0
 #define MODO_MOZART 1
 #define MODO_CHEAT 2 ///DISLEXIA
 
-typedef struct {
+typedef struct
+{
     int num_botones;           // 3..8
     int duracion_inicial_ms;   // MIN 2000 SEGUN TP
     int modo;                  // MODO_SCHONBERG / MODO_MOZART
@@ -84,9 +98,10 @@ typedef struct
 {
     char nombre[50];
     int nivel_alcanzado;
-}tEstadistica;
+} tEstadistica;
 
-typedef struct{
+typedef struct
+{
     int r_brillante;
     int g_brillante;
     int b_brillante;
@@ -102,6 +117,7 @@ typedef struct
     SDL_Renderer *renderizar;
     TTF_Font *texto_fuente;
     TTF_Font *texto_config;
+    TTF_Font *texto_ayuda_fuente;
     SDL_Color texto_color;
     SDL_Rect texto_rect;
     SDL_Texture *textura_imagen;
@@ -152,6 +168,8 @@ void agregar_nuevo_color_secuencia(tJuego *juego);
 void pedirNombreJugador(tJuego *juego, bool *corriendo);
 void manejarEventos(tJuego *juego,bool *corriendo);
 void mostrarPantallaPresentacion(tJuego *juego);
+void mostrarPantallaErrorMozart(tJuego *juego);
+void mostrarPantallaAyuda(tJuego *juego);
 int generar_tono(int limite);
 void mostrarPantallaVictoria(tJuego *juego);
 void guardar_melodia_desafio(tJuego *juego);

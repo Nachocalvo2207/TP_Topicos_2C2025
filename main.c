@@ -8,8 +8,8 @@
 /// DNI: 43569575
 /// Entrega: Si
 
-/// Apellido, nombre: Calvo, Ignacio
-/// DNI: 41162300
+/// Apellido, nombre: Cardoso, Christopfer
+/// DNI: 38511608
 /// Entrega: Si
 
 int main(int argc, char* argv[])
@@ -62,6 +62,12 @@ int main(int argc, char* argv[])
             break;
         case MODO_DESAFIO: // <-- ¡AÑADÍ ESTE CASE!
             dibujar_juego(&juego); // En el modo creación, mostramos el tablero
+            break;
+        case ERROR_MOZART: // <-- NUEVO CASE
+            mostrarPantallaErrorMozart(&juego);
+            break;
+        case AYUDA:
+            mostrarPantallaAyuda(&juego);
             break;
         case FINALIZADO:
             fflush(stdout);
