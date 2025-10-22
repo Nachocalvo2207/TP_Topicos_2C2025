@@ -1,0 +1,18 @@
+#ifndef GRAFICOS_H_INCLUDED
+#define GRAFICOS_H_INCLUDED
+
+#include "juego.h"
+
+
+void dibujarTablero(tJuego *juego);
+void dibujar_texto_izquierda(tJuego* juego, const char* t, int x, int y, TTF_Font* f, SDL_Color c);
+void dibujar_texto_centro(tJuego* juego, const char* t, int x, int y, TTF_Font* f, SDL_Color c);
+void dibujar_texto_derecha(tJuego* juego, const char* t, int x, int y, TTF_Font* f, SDL_Color c);
+void dibujar_juego(tJuego *juego);
+void mostrarMenuConfiguracion(tJuego *juego);
+void mostrarPantallaPresentacion(tJuego *juego);
+void mostrarPantallaErrorMozart(tJuego *juego);
+void mostrarPantallaAyuda(tJuego *juego);
+void mostrarPantallaVictoria(tJuego *juego);
+void pedirNombreJugador(tJuego *juego, bool *corriendo);
+#endif // GRAFICOS_H_INCLUDED

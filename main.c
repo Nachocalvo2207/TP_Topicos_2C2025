@@ -1,4 +1,9 @@
-#include "TP_Topicos.h"
+#include "juego.h"
+#include "setup.h"
+#include "eventos.h"
+#include "logica.h"
+#include "graficos.h"
+#include "estadisticas.h"
 
 /// Apellido, nombre: Calvo, Ignacio
 /// DNI: 41162300
@@ -18,6 +23,10 @@ int main(int argc, char* argv[])
     bool corriendo = true;
     srand(time(NULL));
 
+    // =================================================================
+    // 2. FASE DE INICIALIZACIÓN
+    // Llamamos a las funciones de configuración desde sus módulos.
+    // =================================================================
     if (sdl_Iniciar(&juego))
     {
         limpieza_juego(&juego, ERROR_SALIDA);
@@ -30,18 +39,15 @@ int main(int argc, char* argv[])
     inicializarColores(&juego);
     cargar_estadisticas(&juego);
 
-    reiniciarJuego(&juego); // Estado inicial es INICIO
+    reiniciarJuego(&juego);
 
-    // BUCLE PRINCIPAL DEL JUEGO
+
     while (corriendo)
     {
-        // 1. Manejamos los eventos (esto cambia el estado)
-        manejarEventos(&juego, &corriendo);
 
-        // 2. Actualizamos la lógica del juego (esto solo hace algo en el estado SECUENCIA)
+        manejarEventos(&juego, &corriendo);
         actualizarJuego(&juego);
 
-        // 3. Decidimos QUÉ dibujar basado en el estado actual
         switch (juego.estado_juego)
         {
         case INICIO:
@@ -55,29 +61,27 @@ int main(int argc, char* argv[])
             break;
         case SECUENCIA:
         case JUGANDO:
-            dibujar_juego(&juego); // Esta función dibuja el tablero
+        case MODO_DESAFIO:
+            dibujar_juego(&juego);
             break;
-        case VICTORIA: // <--- Nuevo case
+        case VICTORIA:
             mostrarPantallaVictoria(&juego);
             break;
-        case MODO_DESAFIO: // <-- ¡AÑADÍ ESTE CASE!
-            dibujar_juego(&juego); // En el modo creación, mostramos el tablero
-            break;
-        case ERROR_MOZART: // <-- NUEVO CASE
+        case ERROR_MOZART:
             mostrarPantallaErrorMozart(&juego);
             break;
         case AYUDA:
             mostrarPantallaAyuda(&juego);
             break;
         case FINALIZADO:
-            fflush(stdout);
             mostrar_estadisticas(&juego);
             break;
         }
+
+        ///SDL_Delay(16);
     }
 
     limpieza_juego(&juego, OK_SALIDA);
     return 0;
-
 }
 

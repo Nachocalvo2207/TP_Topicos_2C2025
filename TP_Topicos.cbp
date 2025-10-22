@@ -46,13 +46,30 @@
 		<Compiler>
 			<Add option="-Wall" />
 		</Compiler>
-		<Unit filename="TP_Topicos.c">
+		<Unit filename="estadisticas.c">
 			<Option compilerVar="CC" />
 		</Unit>
-		<Unit filename="TP_Topicos.h" />
+		<Unit filename="estadisticas.h" />
+		<Unit filename="eventos.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="eventos.h" />
+		<Unit filename="graficos.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="graficos.h" />
+		<Unit filename="juego.h" />
+		<Unit filename="logica.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="logica.h" />
 		<Unit filename="main.c">
 			<Option compilerVar="CC" />
 		</Unit>
+		<Unit filename="setup.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="setup.h" />
 		<Extensions />
 	</Project>
 </CodeBlocks_project_file>

@@ -1,5 +1,8 @@
-#ifndef TP_TOPICOS_H_INCLUDED
-#define TP_TOPICOS_H_INCLUDED
+#ifndef JUEGO_H_INCLUDED
+#define JUEGO_H_INCLUDED
+
+
+///LIBRERIAS
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_ttf.h>
 #include <SDL2/SDL_mixer.h>
@@ -11,6 +14,7 @@
 #include <math.h>
 #include <ctype.h>
 
+
 ///PIXELES (Esta asi en el TP)
 #define TITULO "SIMON"
 #define PIXELES_HORIZONTALES 800
@@ -20,6 +24,7 @@
 #define TEXT_SIZE (PIXELES_VERTICALES / 15)
 #define TEXT_CONFIG_SIZE (PIXELES_VERTICALES / 25)
 #define TEXT_AYUDA_SIZE (PIXELES_VERTICALES / 35)
+
 ///COLORES
 #define brilloOscuro 150
 #define brilloBrillante 255
@@ -86,6 +91,8 @@
 #define MODO_MOZART 1
 #define MODO_CHEAT 2 ///DISLEXIA
 
+
+///ESTRUCTURAS
 typedef struct
 {
     int num_botones;           // 3..8
@@ -148,46 +155,6 @@ typedef struct
 } tJuego;
 
 
-///Funciones generales
-bool sdl_Iniciar(tJuego *juego);
-void limpieza_juego(tJuego *juego, int Estatus_Salida);
-bool crearTexto(tJuego *juego);
-void actualizarJuego(tJuego *juego);
-void palabra_mayus(char *palabra);
 
 
-///Funciones del Simon
-void inicializarConfiguracion(tJuego *juego);
-void inicializarColores(tJuego *juego);
-void reiniciarJuego(tJuego *juego);
-void dibujarTablero(tJuego *juego);
-void dibujar_texto(tJuego* juego, const char* texto, int x, int y, SDL_Color color);
-void dibujar_juego(tJuego *juego);
-int detectarBotonClick(int x, int y, int N);
-void agregar_nuevo_color_secuencia(tJuego *juego);
-void pedirNombreJugador(tJuego *juego, bool *corriendo);
-void manejarEventos(tJuego *juego,bool *corriendo);
-void mostrarPantallaPresentacion(tJuego *juego);
-void mostrarPantallaErrorMozart(tJuego *juego);
-void mostrarPantallaAyuda(tJuego *juego);
-int generar_tono(int limite);
-void mostrarPantallaVictoria(tJuego *juego);
-void guardar_melodia_desafio(tJuego *juego);
-
-///Configuracion
-void dibujar_texto_izquierda(tJuego* j, const char* t, int x, int y, TTF_Font* f, SDL_Color c);
-void dibujar_texto_centro(tJuego* j, const char* t, int x, int y, TTF_Font* f, SDL_Color c);
-void dibujar_texto_derecha(tJuego* j, const char* t, int x, int y, TTF_Font* f, SDL_Color c);
-//void iluminarBoton(tJuego *juego, int color);
-void mostrarMenuConfiguracion(tJuego *juego);
-
-int cargarMelodiaDesdeArchivo(const char *ruta, tJuego *juego);
-int calcularDuracionPorNota(int duracion_inicial_ms, int cantidad_notas);
-
-///Estadisticas
-void actualizar_TOP(tJuego *juego);
-void ordenar_top(tEstadistica *top_jugadores, int cantidad);
-void mostrar_estadisticas(tJuego *juego);
-void cargar_estadisticas(tJuego *juego);
-void guardar_estadisticas(tJuego *juego);
-#endif // TP_TOPICOS_H_INCLUDED
+#endif // JUEGO_H_INCLUDED
