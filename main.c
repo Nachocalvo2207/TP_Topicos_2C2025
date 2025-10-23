@@ -23,10 +23,6 @@ int main(int argc, char* argv[])
     bool corriendo = true;
     srand(time(NULL));
 
-    // =================================================================
-    // 2. FASE DE INICIALIZACIÓN
-    // Llamamos a las funciones de configuración desde sus módulos.
-    // =================================================================
     if (sdl_Iniciar(&juego))
     {
         limpieza_juego(&juego, ERROR_SALIDA);

@@ -233,11 +233,11 @@ void mostrarMenuConfiguracion(tJuego *juego)
     const char* nombre_archivo = strrchr(juego->config.ruta_melodia, '/');
     if (nombre_archivo)
     {
-        nombre_archivo++; // Avanzamos el puntero para omitir el '/'
+        nombre_archivo++;
     }
     else
     {
-        nombre_archivo = juego->config.ruta_melodia; // Si no hay '/', es el nombre base
+        nombre_archivo = juego->config.ruta_melodia;
     }
 
     dibujar_texto_centro(juego, nombre_archivo, col_valor_x, y_actual, juego->texto_config, color_valor);
@@ -363,7 +363,7 @@ void mostrarPantallaVictoria(tJuego *juego)
     SDL_RenderPresent(juego->renderizar);
 }
 
-// en graficos.c
+
 void mostrarPantallaError(tJuego *juego)
 {
     SDL_SetRenderDrawColor(juego->renderizar, 180, 0, 0, 255);
