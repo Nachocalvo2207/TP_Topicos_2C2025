@@ -40,9 +40,12 @@
 #define CANT_BOTONES 8
 #define ERROR_MOZART 9
 #define AYUDA 10
+#define MOSTRANDO_ERROR 11
+
+
 
 #define TOP_JUGADORES 5
-#define DURACION_INICIAL 2000 ///Esto son MS
+#define DURACION_INICIAL 1000 ///Esto son MS
 #define PAUSA_ENTRE_NOTAS 75
 #define DURACION_FLASH_JUGADOR 75
 #define PALABRA_CHEAT "DISLEXIA"
@@ -67,6 +70,7 @@
 #define SND_ROSA "snd/ROSA.wav"
 #define SND_VERDE "snd/VERDE.wav"
 #define SND_VIOLETA "snd/VIOLETA.wav"
+#define SND_ERROR "snd/ERROR.wav"
 
 
 ///ESTADOS
@@ -135,7 +139,9 @@ typedef struct
     Uint32 tiempo_ultimo_cambio;
     Uint32 tiempo_encendido;
     Uint32 tiempo_flash_jugador;
+    Uint32 tiempo_inicio_error;
     Mix_Chunk *sonidos[CANT_BOTONES];
+    Mix_Chunk *sonido_error;
     tConfig config;
     tColorData lista_colores[CANT_BOTONES];
     int nivel_actual; ///Nivel al que llego el jugador

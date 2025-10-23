@@ -16,162 +16,182 @@ void manejarEventos(tJuego *juego, bool *corriendo)
             *corriendo = false;
             break;
 
+        case SDL_TEXTINPUT:
+            if (juego->estado_juego == PIDIENDO_NOMBRE)
+            {
+                if (strlen(juego->nombre_jugador) + strlen(event.text.text) < sizeof(juego->nombre_jugador) - 1)
+                {
+                    strcat(juego->nombre_jugador, event.text.text);
+                }
+            }
+            break;
+
+
         case SDL_KEYDOWN:
         {
-            ///Cierro todo con ESC
+
             if (event.key.keysym.scancode == SDL_SCANCODE_ESCAPE)
             {
                 *corriendo = false;
                 break;
             }
-            // Usamos un switch principal para el estado del juego
-            switch (juego->estado_juego)
+
+
+            if (juego->estado_juego == PIDIENDO_NOMBRE)
             {
-            case INICIO:
-                switch (event.key.keysym.scancode)
+                if (event.key.keysym.sym == SDLK_RETURN)
                 {
-                case SDL_SCANCODE_1:
-                    juego->proximo_estado = SECUENCIA;
-                    juego->estado_juego = PIDIENDO_NOMBRE;
+                    if (strlen(juego->nombre_jugador) == 0)
+                        strcpy(juego->nombre_jugador, "ANONIMO");
 
-                    strcpy(juego->nombre_jugador, "");
-                    SDL_StartTextInput();
-                    break;
-
-                case SDL_SCANCODE_2:
-                    juego->estado_juego = MENU_CONFIG;
-                    break;
-
-                case SDL_SCANCODE_3:
-                    juego->proximo_estado = MODO_DESAFIO;
-                    juego->estado_juego = PIDIENDO_NOMBRE;
-                    strcpy(juego->nombre_jugador, "");
-                    SDL_StartTextInput();
-                    break;
-
-                case SDL_SCANCODE_4:
-                    juego->estado_juego = AYUDA;
-                    break;
-                case SDL_SCANCODE_ESCAPE:
-                    *corriendo = false;
-                    break;
-
-                default:
-                    break;
-                }
-                break;
-
-            case MENU_CONFIG:
-                switch (event.key.keysym.scancode)
-                {
-
-                ///Ir al inicio nuevamente
-                case SDL_SCANCODE_M:
-                    juego->estado_juego = INICIO;
-                    break;
-
-                ///Cant. Botones SIMON
-                case SDL_SCANCODE_3:
-                    juego->config.num_botones = 3;
-                    break;
-                case SDL_SCANCODE_4:
-                    juego->config.num_botones = 4;
-                    break;
-                case SDL_SCANCODE_5:
-                    juego->config.num_botones = 5;
-                    break;
-                case SDL_SCANCODE_6:
-                    juego->config.num_botones = 6;
-                    break;
-                case SDL_SCANCODE_7:
-                    juego->config.num_botones = 7;
-                    break;
-                case SDL_SCANCODE_8:
-                    juego->config.num_botones = 8;
-                    break;
-                case SDL_SCANCODE_E:
-                    juego->config.duracion_inicial_ms += 100;
-                    break;
+                    palabra_mayus(juego->nombre_jugador);
+                    SDL_StopTextInput();
 
 
-                ///Aumentar velocidad
-                case SDL_SCANCODE_H:
-                    if (juego->config.duracion_inicial_ms > 200)
+                    if (juego->proximo_estado == MODO_DESAFIO)
                     {
-                        juego->config.duracion_inicial_ms -= 100;
+                        juego->estado_juego = MODO_DESAFIO;
+                        juego->nivel_actual = 0;
                     }
-                    break;
-                ///Modo de juego
-                case SDL_SCANCODE_T:
-                    juego->config.modo = (juego->config.modo == MODO_SCHONBERG) ? MODO_MOZART : MODO_SCHONBERG;
-                    break;
-                ///CAMBIAR MELODIA
-                case SDL_SCANCODE_S:
-                    if (strcmp(juego->config.ruta_melodia, RUTA_MOZART) == 0)
+                    else // Inicia el juego normal (Schonberg o Mozart)
                     {
-                        strcpy(juego->config.ruta_melodia, RUTA_DESAFIO);
+                        juego->nivel_actual = 1;
+                        juego->paso_actual_jugador = 0;
+                        juego->paso_secuencia = 0;
+                        if (juego->config.modo == MODO_MOZART)
+                        {
+                            int notas = cargarMelodiaDesdeArchivo(juego->config.ruta_melodia, juego);
+                            if (notas == ERROR_MELODIA)
+                                juego->estado_juego = ERROR_MOZART;
+                            else
+                            {
+                                juego->long_melodia_mozart = notas;
+                                juego->estado_juego = SECUENCIA;
+                            }
+                        }
+                        else
+                        {
+                            agregar_nuevo_color_secuencia(juego);
+                            juego->estado_juego = SECUENCIA;
+                        }
                     }
-                    else
-                    {
-                        strcpy(juego->config.ruta_melodia, RUTA_MOZART);
-                    }
-                    printf("Melodia seleccionada: %s\n", juego->config.ruta_melodia);
-                    break;
-                default:
-                    break;
                 }
-                break; ///FIN MENU_CONFIG
-
-            case VICTORIA:
-                if (event.type == SDL_KEYDOWN && event.key.keysym.scancode == SDL_SCANCODE_SPACE)
+                else if (event.key.keysym.sym == SDLK_BACKSPACE && strlen(juego->nombre_jugador) > 0)
                 {
-                    juego->estado_juego = INICIO;
+                    juego->nombre_jugador[strlen(juego->nombre_jugador) - 1] = '\0';
                 }
-                break;
-
-            case MODO_DESAFIO:
-                if (event.type == SDL_KEYDOWN && event.key.keysym.scancode == SDL_SCANCODE_RETURN)
-                {
-                    guardar_melodia_desafio(juego);
-                    juego->estado_juego = INICIO;
-                }
-                break;
-            case ERROR_MOZART:
-                if (event.key.keysym.scancode == SDL_SCANCODE_M)
-                {
-                    juego->estado_juego = INICIO;
-                }
-                break;
-
-            case AYUDA:
-                if (event.key.keysym.scancode == SDL_SCANCODE_M)
-                {
-                    juego->estado_juego = INICIO;
-                }
-                break;
-            case FINALIZADO:
-                switch (event.key.keysym.scancode)
-                {
-                case SDL_SCANCODE_SPACE:
-                    strcpy(juego->nombre_jugador, "");
-                    juego->estado_juego = PIDIENDO_NOMBRE;
-                    SDL_StartTextInput();
-                    break;
-
-                case SDL_SCANCODE_M:
-                    reiniciarJuego(juego);
-                    break;
-                default:
-                    break;
-                }
-                break; /// Fin
-
-            default:
-                if(event.key.keysym.scancode == SDL_SCANCODE_ESCAPE)
-                    *corriendo = false;
-                break;
             }
-            break;
+
+            else
+            {
+                switch (juego->estado_juego)
+                {
+                case INICIO:
+                    switch (event.key.keysym.scancode)
+                    {
+                    case SDL_SCANCODE_1:
+                        juego->proximo_estado = SECUENCIA;
+                        juego->estado_juego = PIDIENDO_NOMBRE;
+                        strcpy(juego->nombre_jugador, "");
+                        SDL_StartTextInput();
+                        SDL_FlushEvents(SDL_TEXTINPUT, SDL_TEXTINPUT);
+                        break;
+                    case SDL_SCANCODE_2:
+                        juego->estado_juego = MENU_CONFIG;
+                        break;
+                    case SDL_SCANCODE_3:
+                        juego->proximo_estado = MODO_DESAFIO;
+                        juego->estado_juego = PIDIENDO_NOMBRE;
+                        strcpy(juego->nombre_jugador, "");
+                        SDL_StartTextInput();
+                        SDL_FlushEvents(SDL_TEXTINPUT, SDL_TEXTINPUT);
+                        break;
+                    case SDL_SCANCODE_4:
+                        juego->estado_juego = AYUDA;
+                        break;
+                    default:
+                        break;
+                    }
+                    break;
+
+                case MENU_CONFIG:
+                    switch (event.key.keysym.scancode)
+                    {
+                    case SDL_SCANCODE_M:
+                        juego->estado_juego = INICIO;
+                        break;
+                    case SDL_SCANCODE_3:
+                        juego->config.num_botones = 3;
+                        break;
+                    case SDL_SCANCODE_4:
+                        juego->config.num_botones = 4;
+                        break;
+                    case SDL_SCANCODE_5:
+                        juego->config.num_botones = 5;
+                        break;
+                    case SDL_SCANCODE_6:
+                        juego->config.num_botones = 6;
+                        break;
+                    case SDL_SCANCODE_7:
+                        juego->config.num_botones = 7;
+                        break;
+                    case SDL_SCANCODE_8:
+                        juego->config.num_botones = 8;
+                        break;
+                    case SDL_SCANCODE_E:
+                        juego->config.duracion_inicial_ms += 100;
+                        break;
+                    case SDL_SCANCODE_H:
+                        if (juego->config.duracion_inicial_ms > 200) juego->config.duracion_inicial_ms -= 100;
+                        break;
+                    case SDL_SCANCODE_T:
+                        juego->config.modo = (juego->config.modo == MODO_SCHONBERG) ? MODO_MOZART : MODO_SCHONBERG;
+                        break;
+                    case SDL_SCANCODE_S:
+                        if (strcmp(juego->config.ruta_melodia, RUTA_MOZART) == 0) strcpy(juego->config.ruta_melodia, RUTA_DESAFIO);
+                        else strcpy(juego->config.ruta_melodia, RUTA_MOZART);
+                        break;
+                    default:
+                        break;
+                    }
+                    break;
+
+                case FINALIZADO:
+                    switch (event.key.keysym.scancode)
+                    {
+                    case SDL_SCANCODE_SPACE:
+                        strcpy(juego->nombre_jugador, "");
+                        juego->estado_juego = PIDIENDO_NOMBRE;
+                        SDL_StartTextInput();
+                        break;
+                    case SDL_SCANCODE_M:
+                        reiniciarJuego(juego);
+                        break;
+                    default:
+                        break;
+
+                    }
+                    break;
+
+                case MODO_DESAFIO:
+                    if (event.key.keysym.scancode == SDL_SCANCODE_RETURN)
+                    {
+                        guardar_melodia_desafio(juego);
+                        juego->estado_juego = INICIO;
+                    }
+                    break;
+
+                case VICTORIA:
+                case ERROR_MOZART:
+                case AYUDA:
+                    if (event.key.keysym.scancode == SDL_SCANCODE_M || event.key.keysym.scancode == SDL_SCANCODE_SPACE)
+                    {
+                        juego->estado_juego = INICIO;
+                    }
+                    break;
+                }
+            }
+            break; // Fin del case SDL_KEYDOWN
         }
 
         ///clic del mouse
@@ -191,10 +211,10 @@ void manejarEventos(tJuego *juego, bool *corriendo)
             {
                 Mix_PlayChannel(-1, juego->sonidos[color_clickeado], 0);
             }
-            dibujarTablero(juego);
+            dibujar_juego(juego);
             SDL_Delay(DURACION_FLASH_JUGADOR);
             juego->color_iluminado = SIN_COLOR;
-            dibujarTablero(juego);
+            dibujar_juego(juego);
 
             if (juego->estado_juego == JUGANDO)
             {
@@ -242,12 +262,18 @@ void manejarEventos(tJuego *juego, bool *corriendo)
                         }
                     }
                 }
-                else
+                else ///JUGADOR SE EQUIVOCO
                 {
-                    actualizar_TOP(juego);
 
-                    juego->estado_juego = FINALIZADO;
-                    juego->partidas_jugadas++;
+                    if(juego->sonido_error)
+                    {
+                        Mix_PlayChannel(-1, juego->sonido_error, 0);
+                    }
+                    /// Iluminamos el color que SÍ era el correcto
+                    int color_correcto = juego->secuencia[juego->paso_actual_jugador];
+                    juego->color_iluminado = color_correcto;
+                    juego->estado_juego = MOSTRANDO_ERROR;
+                    juego->tiempo_inicio_error = SDL_GetTicks();
                 }
 
             }

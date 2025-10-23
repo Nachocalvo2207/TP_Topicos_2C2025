@@ -2,7 +2,7 @@
 #define LOGICA_H_INCLUDED
 
 #include "juego.h"
-
+#include "estadisticas.h"
 
 void reiniciarJuego(tJuego *juego);
 void actualizarJuego(tJuego *juego);

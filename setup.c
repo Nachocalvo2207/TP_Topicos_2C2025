@@ -58,7 +58,7 @@ bool sdl_Iniciar(tJuego *juego)
 
 
 
-    ///Carga de sonidos
+    ///Carga de sonidos de los colores
     char *basePath = SDL_GetBasePath();
     char fullPath[256];
 
@@ -73,6 +73,17 @@ bool sdl_Iniciar(tJuego *juego)
         {
             fprintf(stderr,"Error cargando %s: %s\n", fullPath, Mix_GetError());
         }
+    }
+    SDL_free(basePath);
+
+    ///Carga sonido error
+    char errorPath[256];
+    basePath = SDL_GetBasePath();
+    snprintf(errorPath, sizeof(errorPath), "%s%s", basePath, SND_ERROR);
+    juego->sonido_error = Mix_LoadWAV(errorPath);
+    if (!juego->sonido_error)
+    {
+        fprintf(stderr, "Error cargando %s: %s\n", errorPath, Mix_GetError());
     }
     SDL_free(basePath);
 
@@ -179,6 +190,8 @@ void limpieza_juego(tJuego *juego, int Estatus_Salida)
             juego->sonidos[i] = NULL;
         }
     }
+    if(juego->sonido_error)
+        Mix_FreeChunk(juego->sonido_error);
     Mix_CloseAudio();
     SDL_DestroyTexture(juego->textura_imagen);
     TTF_CloseFont(juego->texto_fuente);

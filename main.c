@@ -57,7 +57,7 @@ int main(int argc, char* argv[])
             mostrarMenuConfiguracion(&juego);
             break;
         case PIDIENDO_NOMBRE:
-            pedirNombreJugador(&juego, &corriendo);
+            pedirNombreJugador(&juego);
             break;
         case SECUENCIA:
         case JUGANDO:
@@ -66,6 +66,9 @@ int main(int argc, char* argv[])
             break;
         case VICTORIA:
             mostrarPantallaVictoria(&juego);
+            break;
+        case MOSTRANDO_ERROR:
+            dibujar_juego(&juego);
             break;
         case ERROR_MOZART:
             mostrarPantallaErrorMozart(&juego);
@@ -78,7 +81,7 @@ int main(int argc, char* argv[])
             break;
         }
 
-        ///SDL_Delay(16);
+        SDL_Delay(16);
     }
 
     limpieza_juego(&juego, OK_SALIDA);

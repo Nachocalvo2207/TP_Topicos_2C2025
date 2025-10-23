@@ -363,114 +363,30 @@ void mostrarPantallaVictoria(tJuego *juego)
     SDL_RenderPresent(juego->renderizar);
 }
 
-
-void pedirNombreJugador(tJuego *juego, bool *corriendo)
+// en graficos.c
+void mostrarPantallaError(tJuego *juego)
 {
-    SDL_StartTextInput();
+    SDL_SetRenderDrawColor(juego->renderizar, 180, 0, 0, 255);
     SDL_RenderClear(juego->renderizar);
-
-    const char *comentario = "Ingrese su nombre y presione ENTER";
-    SDL_Surface *sComent = TTF_RenderText_Blended(juego->texto_fuente, comentario, juego->texto_color);
-    SDL_Texture *tComent = SDL_CreateTextureFromSurface(juego->renderizar, sComent);
-    SDL_Rect rComent =
-    {
-        40,
-        PIXELES_VERTICALES/2 - 60,          // un poco más arriba que el prompt
-        sComent->w,
-        sComent->h
-    };
-    SDL_RenderCopy(juego->renderizar, tComent, NULL, &rComent);
-    SDL_FreeSurface(sComent);
-    SDL_DestroyTexture(tComent);
-
-    char prompt[128];
-    snprintf(prompt, sizeof(prompt), "Nombre: %s", juego->nombre_jugador);
-
-    SDL_Surface *s = TTF_RenderText_Blended(juego->texto_fuente, prompt, juego->texto_color);
-    SDL_Texture *t = SDL_CreateTextureFromSurface(juego->renderizar, s);
-    SDL_Rect r = {40, PIXELES_VERTICALES/2 - s->h/2, s->w, s->h};
-    SDL_RenderCopy(juego->renderizar, t, NULL, &r);
-    SDL_FreeSurface(s);
-    SDL_DestroyTexture(t);
-
     SDL_RenderPresent(juego->renderizar);
-
-    SDL_Event event;
-    while(SDL_PollEvent(&event))
-    {
-        if(event.type == SDL_QUIT)
-        {
-            *corriendo = false;
-            return;
-        }
-
-        if (event.type == SDL_TEXTINPUT)
-        {
-            if (strlen(juego->nombre_jugador) + strlen(event.text.text) < sizeof(juego->nombre_jugador) - 1)
-                strcat(juego->nombre_jugador, event.text.text);
-        }
-
-        else if(event.type == SDL_KEYDOWN)
-        {
-            SDL_Keycode key = event.key.keysym.sym;
-
-            if(key == SDLK_ESCAPE)
-            {
-                *corriendo = false;
-                SDL_StopTextInput();
-                return;
-            }
-
-            else if(key == SDLK_RETURN)
-            {
-                if(strlen(juego->nombre_jugador) == 0)
-                    strcpy(juego->nombre_jugador, "VACIO");
-
-                palabra_mayus(juego->nombre_jugador);
-                SDL_StopTextInput();
-
-
-                if (juego->proximo_estado == MODO_DESAFIO)
-                {
-                    juego->estado_juego = MODO_DESAFIO;
-                    juego->nivel_actual = 0;
-                }
-                else
-                {
-
-                    juego->nivel_actual = 1;
-                    juego->paso_actual_jugador = 0;
-                    juego->paso_secuencia = 0;
-
-                    if (juego->config.modo == MODO_MOZART)
-                    {
-                        int notas_cargadas = cargarMelodiaDesdeArchivo(juego->config.ruta_melodia, juego);
-                        if (notas_cargadas == ERROR_MELODIA)
-                        {
-                            juego->estado_juego = ERROR_MOZART;
-                        }
-                        else
-                        {
-                            juego->long_melodia_mozart = notas_cargadas;
-                            juego->estado_juego = SECUENCIA;
-                        }
-                    }
-                    else /// Modo Schonberg o Dislexia
-                    {
-                        agregar_nuevo_color_secuencia(juego);
-                        juego->estado_juego = SECUENCIA;
-                    }
-                }
-                return;;
-            }
-            else if(key == SDLK_BACKSPACE)
-            {
-                size_t L = strlen(juego->nombre_jugador);
-                if(L > 0) juego->nombre_jugador[L-1] = '\0';
-            }
-        }
-    }
 }
 
+
+void pedirNombreJugador(tJuego *juego)
+{
+    SDL_SetRenderDrawColor(juego->renderizar, 20, 20, 30, 255);
+    SDL_RenderClear(juego->renderizar);
+
+    // Dibuja el texto "Ingrese su nombre..."
+    const char *comentario = "Ingrese su nombre y presione ENTER";
+    dibujar_texto_centro(juego, comentario, PIXELES_HORIZONTALES / 2, PIXELES_VERTICALES / 2 - 60, juego->texto_config, juego->texto_color);
+
+    // Dibuja el nombre que se está escribiendo
+    char prompt[128];
+    snprintf(prompt, sizeof(prompt), "Nombre: %s_", juego->nombre_jugador); // Agregué un "_" para simular un cursor
+    dibujar_texto_centro(juego, prompt, PIXELES_HORIZONTALES / 2, PIXELES_VERTICALES / 2, juego->texto_fuente, juego->texto_color);
+
+    SDL_RenderPresent(juego->renderizar);
+}
 
 

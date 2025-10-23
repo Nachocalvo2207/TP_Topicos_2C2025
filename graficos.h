@@ -14,5 +14,7 @@ void mostrarPantallaPresentacion(tJuego *juego);
 void mostrarPantallaErrorMozart(tJuego *juego);
 void mostrarPantallaAyuda(tJuego *juego);
 void mostrarPantallaVictoria(tJuego *juego);
-void pedirNombreJugador(tJuego *juego, bool *corriendo);
+void mostrarPantallaError(tJuego *juego);
+void pedirNombreJugador(tJuego *juego);
+
 #endif // GRAFICOS_H_INCLUDED

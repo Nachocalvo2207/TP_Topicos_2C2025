@@ -13,12 +13,12 @@ void reiniciarJuego(tJuego *juego)
 
 void actualizarJuego(tJuego *juego)
 {
-    // Lógica para mostrar la secuencia
+
     if (juego->estado_juego == SECUENCIA)
     {
         int duracion_a_esperar;
 
-        // Decidimos cuánto tiempo esperar
+
         if (juego->color_iluminado != -1)///Luz PRENDIDA
         {
             duracion_a_esperar = calcularDuracionPorNota(juego->config.duracion_inicial_ms, juego->nivel_actual);
@@ -67,6 +67,18 @@ void actualizarJuego(tJuego *juego)
             juego->estado_juego = SECUENCIA;
             juego->paso_actual_jugador = 0;
             juego->tiempo_ultimo_cambio = SDL_GetTicks();
+        }
+    }
+
+    if (juego->estado_juego == MOSTRANDO_ERROR)
+    {
+
+        if (SDL_GetTicks() > juego->tiempo_inicio_error + 1500)
+        {
+            juego->color_iluminado = SIN_COLOR;
+            actualizar_TOP(juego);
+            juego->partidas_jugadas++;
+            juego->estado_juego = FINALIZADO;
         }
     }
 }
