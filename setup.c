@@ -153,6 +153,13 @@ bool crearTexto(tJuego *juego)
         fprintf(stderr,"ERROR CREANDO LA FUENTE DE AYUDA: %s\n",TTF_GetError());
         return true;
     }
+
+    juego->texto_boton_control = TTF_OpenFont(RUTA_FUENTE, TEXT_BOTON_CONTROL_SIZE);
+    if (!juego->texto_boton_control)
+    {
+        fprintf(stderr, "ERROR CREANDO LA FUENTE DE BOTONES DE CONTROL: %s\n", TTF_GetError());
+        return true;
+    }
     SDL_Surface *superficie = TTF_RenderText_Blended(juego->texto_fuente,"SIMON",juego->texto_color);
 
     if(!superficie)
@@ -196,6 +203,9 @@ void limpieza_juego(tJuego *juego, int Estatus_Salida)
     SDL_DestroyTexture(juego->textura_imagen);
     TTF_CloseFont(juego->texto_fuente);
     TTF_CloseFont(juego->texto_config);
+    TTF_CloseFont(juego->texto_ayuda_fuente);
+    if (juego->texto_boton_control)
+        TTF_CloseFont(juego->texto_boton_control);
     SDL_DestroyRenderer(juego->renderizar);
     SDL_DestroyWindow(juego->ventana);
     TTF_Quit();

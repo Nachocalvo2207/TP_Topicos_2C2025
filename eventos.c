@@ -113,7 +113,31 @@ void manejarEventos(tJuego *juego, bool *corriendo)
                         break;
                     }
                     break;
+// eventos.c
 
+                case JUGANDO:
+                    switch (event.key.keysym.scancode)
+                    {
+                    case SDL_SCANCODE_O: // Tecla 'O' para Ordenar
+                        mostrar_secuencia(juego, "SECUENCIA ORIGINAL antes de ordenar");
+                        ordenar_secuencia_por_seleccion(juego);
+                        mostrar_secuencia(juego, "SECUENCIA ORDENADA (Grave a Agudo)");
+                        juego->paso_actual_jugador = 0;
+                        // Cambiamos a secuencia para que la vea/escuche ordenada si queremos
+                        // juego->estado_juego = SECUENCIA;
+                        break;
+
+                    case SDL_SCANCODE_S: // Tecla 'S' para Desordenar (Shuffle)
+                        mostrar_secuencia(juego, "SECUENCIA ORIGINAL antes de desordenar");
+                        desordenar_secuencia(juego);
+                        mostrar_secuencia(juego, "SECUENCIA DESORDENADA");
+                        // Reiniciamos el paso del jugador
+                        juego->paso_actual_jugador = 0;
+                        break;
+                    default:
+                        break;
+                    }
+                    break;
                 case MENU_CONFIG:
                     switch (event.key.keysym.scancode)
                     {
@@ -197,11 +221,40 @@ void manejarEventos(tJuego *juego, bool *corriendo)
         ///clic del mouse
         case SDL_MOUSEBUTTONDOWN:
         {
-            if (juego->estado_juego != JUGANDO && juego->estado_juego != MODO_DESAFIO)
-                break; /// NO TIENE EN CUENTA EL CLIC
-
             int mouseX = event.button.x;
             int mouseY = event.button.y;
+
+            // Los botones son interactivos en estados de juego y reproducción
+            if (juego->estado_juego == JUGANDO || juego->estado_juego == SECUENCIA)
+            {
+                ///ORDENAR
+                if (mouseX >= BTN_ORDENAR_X && mouseX <= BTN_ORDENAR_X + BTN_ANCHO &&
+                        mouseY >= BTN_ORDENAR_Y && mouseY <= BTN_ORDENAR_Y + BTN_ALTO)
+                {
+                    mostrar_secuencia(juego, "SECUENCIA ORIGINAL antes de ordenar");
+                    ordenar_secuencia_por_seleccion(juego);
+                    mostrar_secuencia(juego, "SECUENCIA ORDENADA (Grave a Agudo)");
+
+                    forzar_reproduccion_secuencia(juego);
+                    return;
+                }
+
+                ///DESORDENAR
+                else if (mouseX >= BTN_DESORDENAR_X && mouseX <= BTN_DESORDENAR_X + BTN_ANCHO &&
+                         mouseY >= BTN_DESORDENAR_Y && mouseY <= BTN_DESORDENAR_Y + BTN_ALTO)
+                {
+                    mostrar_secuencia(juego, "SECUENCIA ORIGINAL antes de desordenar");
+                    desordenar_secuencia(juego);
+                    mostrar_secuencia(juego, "SECUENCIA DESORDENADA (Shuffle)");
+
+                    // Llama a la función modularizada para forzar la repetición
+                    forzar_reproduccion_secuencia(juego);
+                    return; // Consumir el evento y salir de la función
+                }
+            }
+
+            if (juego->estado_juego != JUGANDO && juego->estado_juego != MODO_DESAFIO)
+                break; /// NO TIENE EN CUENTA EL CLIC
             int color_clickeado = detectarBotonClick(mouseX, mouseY, juego->config.num_botones);
             int color_correcto; ///PARA EL MODO_CHEAT
             if (color_clickeado == SIN_COLOR)
@@ -269,7 +322,7 @@ void manejarEventos(tJuego *juego, bool *corriendo)
                     {
                         Mix_PlayChannel(-1, juego->sonido_error, 0);
                     }
-                    /// Iluminamos el color que SÍ era el correcto
+                    /// Iluminamos el color que SI era el correcto
                     int color_correcto = juego->secuencia[juego->paso_actual_jugador];
                     juego->color_iluminado = color_correcto;
                     juego->estado_juego = MOSTRANDO_ERROR;

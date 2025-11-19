@@ -117,7 +117,7 @@ void dibujar_juego(tJuego *juego)
         fprintf(stderr,"ERROR CREANDO SUPERFICIE: %s\n",SDL_GetError());
         return;
     }
-
+    dibujar_botones_control(juego);
     SDL_Texture *textura_nivel = SDL_CreateTextureFromSurface(juego->renderizar,superficie_nivel);
 
     SDL_Rect rect_Nivel;
@@ -389,4 +389,38 @@ void pedirNombreJugador(tJuego *juego)
     SDL_RenderPresent(juego->renderizar);
 }
 
+
+
+
+void _dibujar_rectangulo_boton(tJuego *juego, int x, int y, int w, int h, const char *texto,
+                               SDL_Color fondo_color, SDL_Color texto_color)
+{
+    TTF_Font *font = juego->texto_boton_control;
+
+    SDL_Rect rect = {x, y, w, h};
+    SDL_SetRenderDrawColor(juego->renderizar, fondo_color.r, fondo_color.g, fondo_color.b, fondo_color.a);
+    SDL_RenderFillRect(juego->renderizar, &rect);
+    dibujar_texto_centro(juego, texto,
+                         x + w / 2,
+                         y + h / 2 - (TTF_FontHeight(font) / 2),
+                         font,
+                         texto_color);
+}
+
+void dibujar_botones_control(tJuego *juego)
+{
+    SDL_Color fondo_control = {50, 50, 50, 255};
+    SDL_Color texto_control = {255, 255, 255, 255};
+
+    if (juego->estado_juego == JUGANDO || juego->estado_juego == SECUENCIA)
+    {
+        ///ORDENAR
+        _dibujar_rectangulo_boton(juego, BTN_ORDENAR_X, BTN_ORDENAR_Y, BTN_ANCHO, BTN_ALTO, "Ordenar",
+                                  fondo_control, texto_control);
+
+        /// DESORDENAR
+        _dibujar_rectangulo_boton(juego, BTN_DESORDENAR_X, BTN_DESORDENAR_Y, BTN_ANCHO, BTN_ALTO, "Desordenar",
+                                  fondo_control, texto_control);
+    }
+}
 

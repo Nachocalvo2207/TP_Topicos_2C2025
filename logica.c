@@ -234,5 +234,102 @@ int detectarBotonClick(int x, int y, int N)
     return indice_boton;
 }
 
+///Logica recuperatorio...
+int cmp_tono_ascendente(const int *a, const int *b)
+{
+    return *a - *b; // Ordena de grave (menor) a agudo (mayor)
+}
 
+void intercambio_generico(void *a, void *b, size_t tam)
+{
+    char aux;
+    char *ptr_a = (char *)a;
+    char *ptr_b = (char *)b;
 
+    // Intercambia byte por byte [cite: 2347, 5439]
+    while (tam--) {
+        aux = *ptr_a;
+        *ptr_a = *ptr_b;
+        *ptr_b = aux;
+        ptr_a++;
+        ptr_b++;
+    }
+}
+
+// logica.c
+void ordenar_secuencia_por_seleccion(tJuego *juego)
+{
+    int *base = juego->secuencia;
+    int *fin = base + juego->nivel_actual;
+    int *ptr_actual = base;
+
+    int *pos_menor;
+    int *ptr_recorrido;
+
+    while (ptr_actual < fin - 1)
+    {
+        pos_menor = ptr_actual;
+        ptr_recorrido = ptr_actual + 1;
+
+        while (ptr_recorrido < fin)
+        {
+
+            if (cmp_tono_ascendente(ptr_recorrido, pos_menor) < 0)
+            {
+                pos_menor = ptr_recorrido;
+            }
+            ptr_recorrido++;
+        }
+
+        if (pos_menor != ptr_actual)
+            intercambio_generico(ptr_actual, pos_menor, sizeof(int));
+
+        ptr_actual++;
+    }
+}
+
+// logica.c
+
+void desordenar_secuencia(tJuego *juego)
+{
+    int *base = juego->secuencia;
+    int *fin_mezcla = base + juego->nivel_actual;
+    int *ptr_actual;
+    int indice_aleatorio;
+
+    for (ptr_actual = fin_mezcla - 1; ptr_actual > base; ptr_actual--)
+    {
+        size_t distancia = ptr_actual - base + 1;
+        indice_aleatorio = rand() % distancia;
+        int *ptr_aleatorio = base + indice_aleatorio;
+        intercambio_generico(ptr_actual, ptr_aleatorio, sizeof(int));
+    }
+}
+
+// logica.c
+
+void mostrar_secuencia(tJuego *juego, const char *titulo)
+{
+    int *ptr_actual = juego->secuencia;
+    int *fin = juego->secuencia + juego->nivel_actual;
+
+    printf("\n--- %s (Nivel: %d) ---\n", titulo, juego->nivel_actual);
+
+    while (ptr_actual < fin)
+    {
+        // Imprime el valor (tono) y avanza el puntero
+        printf("%d ", *ptr_actual);
+        ptr_actual++;
+    }
+    printf("\n-------------------------\n");
+}
+
+void forzar_reproduccion_secuencia(tJuego *juego)
+{
+    /// Asegura que el estado del juego sea la reproducción de la secuencia
+    juego->estado_juego = SECUENCIA;
+    juego->paso_secuencia = 0;
+    juego->tiempo_ultimo_cambio = SDL_GetTicks();
+    juego->paso_actual_jugador = 0;
+    juego->color_iluminado = SIN_COLOR;
+}

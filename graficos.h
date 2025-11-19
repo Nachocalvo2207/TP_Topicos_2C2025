@@ -16,5 +16,8 @@ void mostrarPantallaAyuda(tJuego *juego);
 void mostrarPantallaVictoria(tJuego *juego);
 void mostrarPantallaError(tJuego *juego);
 void pedirNombreJugador(tJuego *juego);
+void _dibujar_rectangulo_boton(tJuego *juego, int x, int y, int w, int h, const char *texto,
+                               SDL_Color fondo_color, SDL_Color texto_color);
+void dibujar_botones_control(tJuego *juego);
 
 #endif // GRAFICOS_H_INCLUDED

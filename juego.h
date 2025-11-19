@@ -24,7 +24,19 @@
 #define TEXT_SIZE (PIXELES_VERTICALES / 15)
 #define TEXT_CONFIG_SIZE (PIXELES_VERTICALES / 25)
 #define TEXT_AYUDA_SIZE (PIXELES_VERTICALES / 35)
+#define TEXT_BOTON_CONTROL_SIZE (PIXELES_VERTICALES / 50)
+///BOTONES
+#define BTN_ANCHO 80   // Reducción de 100 a 80
+#define BTN_ALTO 25    // Reducción de 30 a 25 (más compactos)
 
+// Posición X y Y para el primer botón ("Ordenar")
+#define BTN_ORDENAR_X 20                                  // Cerca del margen izquierdo
+#define BTN_ORDENAR_Y (PIXELES_VERTICALES - 80)           // Posición vertical inicial (más arriba)
+
+// Posición X y Y para el segundo botón ("Desordenar")
+// Lo colocamos debajo de BTN_ORDENAR_Y con un pequeño margen (e.g., 5px)
+#define BTN_DESORDENAR_X BTN_ORDENAR_X                    // Mismo margen izquierdo (apilados)
+#define BTN_DESORDENAR_Y (BTN_ORDENAR_Y + BTN_ALTO + 5)
 ///COLORES
 #define brilloOscuro 150
 #define brilloBrillante 255
@@ -129,6 +141,7 @@ typedef struct
     TTF_Font *texto_fuente;
     TTF_Font *texto_config;
     TTF_Font *texto_ayuda_fuente;
+    TTF_Font *texto_boton_control;
     SDL_Color texto_color;
     SDL_Rect texto_rect;
     SDL_Texture *textura_imagen;

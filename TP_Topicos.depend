@@ -6,7 +6,7 @@
 1761173789 c:\users\o014851\desktop\nacho\unlam\tp_topicos\tp_topicos_2c2025\estadisticas.h
 	"juego.h"
 
-1761191363 c:\users\o014851\desktop\nacho\unlam\tp_topicos\tp_topicos_2c2025\juego.h
+1763517842 c:\users\o014851\desktop\nacho\unlam\tp_topicos\tp_topicos_2c2025\juego.h
 	<SDL2/SDL.h>
 	<SDL2/SDL_ttf.h>
 	<SDL2/SDL_mixer.h>
@@ -474,27 +474,27 @@
 	"begin_code.h"
 	"close_code.h"
 
-1761191363 c:\users\o014851\desktop\nacho\unlam\tp_topicos\tp_topicos_2c2025\graficos.h
+1763516804 c:\users\o014851\desktop\nacho\unlam\tp_topicos\tp_topicos_2c2025\graficos.h
 	"juego.h"
 
-1761192308 source:c:\users\o014851\desktop\nacho\unlam\tp_topicos\tp_topicos_2c2025\eventos.c
+1763517224 source:c:\users\o014851\desktop\nacho\unlam\tp_topicos\tp_topicos_2c2025\eventos.c
 	"juego.h"
 	"logica.h"
 	"estadisticas.h"
 	"graficos.h"
 
-1761191461 c:\users\o014851\desktop\nacho\unlam\tp_topicos\tp_topicos_2c2025\logica.h
+1763517001 c:\users\o014851\desktop\nacho\unlam\tp_topicos\tp_topicos_2c2025\logica.h
 	"juego.h"
 	"estadisticas.h"
 
-1761191363 source:c:\users\o014851\desktop\nacho\unlam\tp_topicos\tp_topicos_2c2025\graficos.c
+1763517938 source:c:\users\o014851\desktop\nacho\unlam\tp_topicos\tp_topicos_2c2025\graficos.c
 	"graficos.h"
 	"logica.h"
 
-1761192384 source:c:\users\o014851\desktop\nacho\unlam\tp_topicos\tp_topicos_2c2025\logica.c
+1763517189 source:c:\users\o014851\desktop\nacho\unlam\tp_topicos\tp_topicos_2c2025\logica.c
 	"logica.h"
 
-1761192684 source:c:\users\o014851\desktop\nacho\unlam\tp_topicos\tp_topicos_2c2025\main.c
+1761193029 source:c:\users\o014851\desktop\nacho\unlam\tp_topicos\tp_topicos_2c2025\main.c
 	"juego.h"
 	"setup.h"
 	"eventos.h"
@@ -508,6 +508,6 @@
 1761174200 c:\users\o014851\desktop\nacho\unlam\tp_topicos\tp_topicos_2c2025\eventos.h
 	"juego.h"
 
-1761191006 source:c:\users\o014851\desktop\nacho\unlam\tp_topicos\tp_topicos_2c2025\setup.c
+1763517902 source:c:\users\o014851\desktop\nacho\unlam\tp_topicos\tp_topicos_2c2025\setup.c
 	"setup.h"
 
